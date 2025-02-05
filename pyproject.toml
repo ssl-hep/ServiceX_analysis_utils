@@ -1,0 +1,39 @@
+[build-system]
+requires = ["hatchling"] 
+build-backend = "hatchling.build"
+
+[project]
+name = "servicex_analysis_utils"
+version = "1.0.b1"
+description = "A package with analysis tools for ServiceX."
+authors = [{name = "Artur Cordeiro Oudot Choi", email = "acordeir@cern.ch"}]
+readme = "README.md"
+license = { text = "BSD-3-Clause" }
+requires-python = ">=3.9"
+dependencies = [ 
+    "uproot>=5.0",
+    "awkward>=2.6",
+    "dask-awkward>=2024.12.2",
+]
+
+[project.urls]
+"Source Code" = "https://github.com/ArturU043/ServiceX_analysis_utils"
+"Documentation" = "https://servicex.readthedocs.io/"
+"Issue Tracker" = "https://github.com/ArturU043/ServiceX_analysis_utils/issues"
+
+[tool.hatch.build.targets.sdist]
+include = [
+    "/servicex_analysis_utils",
+    "/tests/"
+]
+
+[project.optional-dependencies]
+
+# Developer extras
+test = [
+    "pytest>=7.2.0",
+    "numpy>=1.21", 
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ["servicex_analysis_utils"]
