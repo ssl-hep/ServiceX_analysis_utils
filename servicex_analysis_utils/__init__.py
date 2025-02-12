@@ -29,4 +29,3 @@ from .materialization import to_awk
 
 __version__ = "1.0.b1"
 __all__ = ['to_awk']
-#__version__ = importlib.metadata.version("servicex") 
