@@ -1,0 +1,6 @@
+#py caches 
+__pycache__/
+.pytest_cache/
+
+#Distribution 
+dist/

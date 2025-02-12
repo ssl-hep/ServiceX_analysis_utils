@@ -18,13 +18,11 @@ dependencies = [
 
 [project.urls]
 "Source Code" = "https://github.com/ArturU043/ServiceX_analysis_utils"
-"Documentation" = "https://servicex.readthedocs.io/"
 "Issue Tracker" = "https://github.com/ArturU043/ServiceX_analysis_utils/issues"
 
 [tool.hatch.build.targets.sdist]
 include = [
-    "/servicex_analysis_utils",
-    "/tests/"
+    "/servicex_analysis_utils"
 ]
 
 [project.optional-dependencies]
