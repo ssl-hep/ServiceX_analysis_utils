@@ -33,12 +33,14 @@ import logging
 import os
 import sys
 import numpy as np
-
-#Setting rpath
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 from servicex_analysis_utils.materialization import to_awk
 
-def build_test_samples():
+
+@pytest.fixture
+def build_test_samples(tmp_path):
+
+    test_path1 = tmp_path / "test_file1.root"
+    test_path2 = tmp_path / "test_file2.root"
     # example data for two branches
     tree_data1 = {
     "branch1": np.ones(100),
@@ -54,71 +56,66 @@ def build_test_samples():
     with uproot.create(test_path2) as file:
         file["Tree"] = tree_data2
 
-#Initial test configuration
-@pytest.fixture(scope="function", autouse=True)
-def init(tmp_path):
-    #Setting global variables to be used in the tests and helper function
-    global test_path1, test_path2, \
-           result, result_da, result_filtered 
-
-    test_path1 = tmp_path / "test_file1.root"
-    test_path2 = tmp_path / "test_file2.root"
-
-    #Building dumy test files
-    if not os.path.exists(test_path1) or not os.path.exists(test_path2):
-        build_test_samples()
-
     #Dict like servicex.deliver() output
     sx_dict = {"Test-Sample1": test_path1, "Test-Sample2": test_path2}
 
-    #Executing to_awk() and saving results for tests
-    result = to_awk(sx_dict)
-    result_da = to_awk(sx_dict, dask=True, step_size=10) #uproot.dask step_size kwarg
-    result_filtered = to_awk(sx_dict, expressions="branch1") #uproot.iterate expressions kwarg
+    return sx_dict
+
 
 #Test functions
-def test_to_awk_instances():
-    arr1=result["Test-Sample1"]
-    da_arr1=result_da["Test-Sample1"]
-
-    #Testing returned types
-    assert isinstance(arr1, ak.Array), "to_awk() does not produce an awkward.Array instance"
-    assert isinstance(da_arr1, dak.Array), "to_awk(dask=True) does not produce a dask_awkward.Array instance"
-
-def test_to_awk_collection():
-    arr1=result["Test-Sample1"]
-    arr2=result["Test-Sample2"]
+def test_to_awk_collection(build_test_samples):
+    sx_dict = build_test_samples
+    result = to_awk(sx_dict) #uproot.iterate expressions kwarg
 
     #Collecting all samples 
     assert list(result.keys())==["Test-Sample1", "Test-Sample2"]
+    arr1=result["Test-Sample1"]
+    arr2=result["Test-Sample2"]
+
+    #Collecting all branches
+    assert ak.fields(arr1) == ['branch1', 'branch2']
+    assert ak.fields(arr2) == ['branch1']
+    
+    assert isinstance(arr1, ak.Array), "to_awk() does not produce an awkward.Array instance"
+    assert isinstance(arr2, ak.Array), "to_awk() does not produce an awkward.Array instance"
+  
+    #Collecting all elements per branch
+    assert ak.all(arr1['branch2'] == ak.from_numpy(np.zeros(100)))
+    assert ak.all(arr2['branch1'] == ak.from_numpy(np.ones(10)))
+
+    #Checking kwargs
+    result_filtered = to_awk(sx_dict, expressions="branch1") #uproot.iterate expressions kwarg
+    arr1_filtered=result_filtered["Test-Sample1"]
+    assert ak.fields(arr1_filtered) == ['branch1'] #branch2 should be filtered out
+
+
+def test_to_awk_dask(build_test_samples):
+    sx_dict = build_test_samples
+    result_da = to_awk(sx_dict, dask=True, step_size=10) #uproot.dask step_size kwarg
+    
+    #Collecting all samples 
+    assert list(result_da.keys())==["Test-Sample1", "Test-Sample2"]
+    arr1=result_da["Test-Sample1"]
+    arr2=result_da["Test-Sample2"]
+
+    #Checking instance
+    assert isinstance(arr1, dak.Array), "to_awk(dask=True) does not produce an dak.Array instance"
+    assert isinstance(arr2, dak.Array), "to_awk(dask=True) does not produce an dak.Array instance"
+
+    #Testing partitionning kwarg
+    assert arr1.npartitions == 10
+    assert arr2.npartitions == 1
 
     #Collecting all branches
     assert ak.fields(arr1) == ['branch1', 'branch2']
     assert ak.fields(arr2) == ['branch1']
 
     #Collecting all elements per branch
-    assert ak.all(arr1['branch2'] == ak.from_numpy(np.zeros(100)))
-    assert ak.all(arr2['branch1'] == ak.from_numpy(np.ones(10)))
+    assert ak.all(arr1['branch2'].compute() == ak.from_numpy(np.zeros(100)))
+    assert ak.all(arr2['branch1'].compute() == ak.from_numpy(np.ones(10)))
 
-def test_to_awk_dask():
-    arr1=result_da["Test-Sample1"]
-    arr2=result_da["Test-Sample2"]
 
-    #Testing if dask.compute() leads to same results
-    assert ak.almost_equal(arr1.compute(), result["Test-Sample1"])
-    assert ak.almost_equal(arr2.compute(), result["Test-Sample2"])
 
-    #Testing partitionning kwarg
-    assert arr1.npartitions == 10
-    assert arr2.npartitions == 1
-
-def test_to_awk_filter():
-    arr1=result_filtered["Test-Sample1"]
-    arr2=result_filtered["Test-Sample2"]
-
-    #Testing if filtering kwargs are passed to uproot.iterate()
-    assert ak.fields(arr1) == ['branch1'] #branch2 should be filtered out
-    assert ak.fields(arr2) == ['branch1'] 
 
 
 
