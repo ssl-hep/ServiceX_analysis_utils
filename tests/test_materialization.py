@@ -39,8 +39,8 @@ from servicex_analysis_utils.materialization import to_awk
 @pytest.fixture
 def build_test_samples(tmp_path):
 
-    test_path1 = tmp_path / "test_file1.root"
-    test_path2 = tmp_path / "test_file2.root"
+    test_path1 = str(tmp_path / "test_file1.root")
+    test_path2 = str(tmp_path / "test_file2.root")
     # example data for two branches
     tree_data1 = {
     "branch1": np.ones(100),
@@ -57,7 +57,7 @@ def build_test_samples(tmp_path):
         file["Tree"] = tree_data2
 
     #Dict like servicex.deliver() output
-    sx_dict = {"Test-Sample1": test_path1, "Test-Sample2": test_path2}
+    sx_dict = {"Test-Sample1": [test_path1], "Test-Sample2": [test_path2]}
 
     return sx_dict
 
