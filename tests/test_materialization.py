@@ -63,7 +63,7 @@ def build_test_samples(tmp_path):
 
 
 #Test functions
-def test_to_awk_collection(build_test_samples):
+def test_to_awk(build_test_samples):
     sx_dict = build_test_samples
     result = to_awk(sx_dict) #uproot.iterate expressions kwarg
 
