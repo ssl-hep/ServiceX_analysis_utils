@@ -31,6 +31,7 @@ include = [
 test = [
     "pytest>=7.2.0",
     "numpy>=1.21", 
+    "pyarrow>=8.0.0"
 ]
 
 [tool.hatch.build.targets.wheel]
