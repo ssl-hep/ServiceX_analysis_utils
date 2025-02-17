@@ -29,7 +29,7 @@ def build_test_samples(tmp_path):
     })
 
     # Write to Parquet files
-    ak.to_parquet(data1, test_path1, row_group_size=10000) #partions
+    ak.to_parquet(data1, test_path1, row_group_size=10) #partions
     ak.to_parquet(data2, test_path2)
 
     # Dict simulating servicex.deliver() output
