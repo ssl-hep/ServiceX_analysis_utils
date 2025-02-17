@@ -48,15 +48,32 @@ def to_awk(deliver_dict, dask=False, **uproot_kwargs):
     awk_arrays = {}
 
     for sample, paths in deliver_dict.items():
+        #Check file type
+        if paths[0].endswith(".root"):
+            is_root=True
+        elif paths[0].endswith(".parquet") or paths[0].endswith(".pq"):
+            is_root=False 
+            # ServiceX supports only root/parquet in transformed files
+        else:
+            raise ValueError(f"Unsupported file format: '{paths[0]}'. Files must be ROOT (.root) or Parquet (.parquet, .pq)")
+        
         try:
             if dask:
-                # Use uproot.dask to handle URLs and local paths lazily 
-                awk_arrays[sample] = uproot.dask(paths, library="ak", **uproot_kwargs)
+                if is_root==True:
+                    # Use uproot.dask to handle URLs and local paths lazily 
+                    awk_arrays[sample] = uproot.dask(paths, library="ak", **uproot_kwargs)
+                else:
+                    #file is parquet 
+                    awk_arrays[sample] = dak.from_parquet(paths)
             else:
-                # Use uproot.iterate to handle URLs and local paths files in chunks
-                tmp_arrays = list(uproot.iterate(paths, library="ak", **uproot_kwargs))
-                # Merge arrays
-                awk_arrays[sample] = ak.concatenate(tmp_arrays) 
+                if is_root==True:
+                    # Use uproot.iterate to handle URLs and local paths files in chunks
+                    tmp_arrays = list(uproot.iterate(paths, library="ak", **uproot_kwargs))
+                    # Merge arrays
+                    awk_arrays[sample] = ak.concatenate(tmp_arrays) 
+                else:
+                    awk_arrays[sample] = ak.from_parquet(paths)
+
 
         except Exception as e:
             # Log the exception pointing at the user's code 
