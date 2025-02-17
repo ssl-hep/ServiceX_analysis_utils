@@ -39,8 +39,8 @@ from servicex_analysis_utils.materialization import to_awk
 @pytest.fixture
 def build_test_samples(tmp_path):
 
-    test_path1 = tmp_path / "test_file1.root"
-    test_path2 = tmp_path / "test_file2.root"
+    test_path1 = str(tmp_path / "test_file1.root")
+    test_path2 = str(tmp_path / "test_file2.root")
     # example data for two branches
     tree_data1 = {
     "branch1": np.ones(100),
@@ -57,13 +57,13 @@ def build_test_samples(tmp_path):
         file["Tree"] = tree_data2
 
     #Dict like servicex.deliver() output
-    sx_dict = {"Test-Sample1": test_path1, "Test-Sample2": test_path2}
+    sx_dict = {"Test-Sample1": [test_path1], "Test-Sample2": [test_path2]}
 
     return sx_dict
 
 
 #Test functions
-def test_to_awk_collection(build_test_samples):
+def test_to_awk(build_test_samples):
     sx_dict = build_test_samples
     result = to_awk(sx_dict) #uproot.iterate expressions kwarg
 
@@ -113,6 +113,14 @@ def test_to_awk_dask(build_test_samples):
     #Collecting all elements per branch
     assert ak.all(arr1['branch2'].compute() == ak.from_numpy(np.zeros(100)))
     assert ak.all(arr2['branch1'].compute() == ak.from_numpy(np.ones(10)))
+
+
+def test_unsupported_file_format():
+    fake_paths = {"fake-Sample": ["invalid_file.txt"]}
+    # match is regex-level
+    with pytest.raises(ValueError, match=r"Unsupported file format: 'invalid_file.txt'\. Files must be ROOT \(.*\) or Parquet \(.*\)"):
+        to_awk(fake_paths)
+
 
 
 
