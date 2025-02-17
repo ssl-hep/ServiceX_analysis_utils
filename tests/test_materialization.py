@@ -115,6 +115,14 @@ def test_to_awk_dask(build_test_samples):
     assert ak.all(arr2['branch1'].compute() == ak.from_numpy(np.ones(10)))
 
 
+def test_unsupported_file_format():
+    fake_paths = {"fake-Sample": ["invalid_file.txt"]}
+    # match is regex-level
+    with pytest.raises(ValueError, match=r"Unsupported file format: 'invalid_file.txt'\. Files must be ROOT \(.*\) or Parquet \(.*\)"):
+        to_awk(fake_paths)
+
+
+
 
 
 
