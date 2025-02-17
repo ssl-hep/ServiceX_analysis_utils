@@ -30,7 +30,7 @@ import awkward as ak
 import dask_awkward as dak 
 import logging 
 
-def to_awk(deliver_dict, dask=False, **uproot_kwargs):
+def to_awk(deliver_dict, dask=False, **kwargs):
     """
     Load an awkward array from the deliver() output with uproot or uproot.dask.
 
@@ -38,7 +38,7 @@ def to_awk(deliver_dict, dask=False, **uproot_kwargs):
         deliver_dict (dict): Returned dictionary from servicex.deliver()
                             (keys are sample names, values are file paths or URLs).
         dask (bool):        Optional. Flag to load as dask-awkward array. Default is False
-        **uproot_kwargs :   Optional. Additional keyword arguments passed to uproot.dask or uproot.iterate
+        **kwargs :   Optional. Additional keyword arguments passed to uproot.dask, uproot.iterate and from_parquet
 
     
     Returns:
@@ -62,19 +62,19 @@ def to_awk(deliver_dict, dask=False, **uproot_kwargs):
             if dask:
                 if is_root==True:
                     # Use uproot.dask to handle URLs and local paths lazily 
-                    awk_arrays[sample] = uproot.dask(paths, library="ak", **uproot_kwargs)
+                    awk_arrays[sample] = uproot.dask(paths, library="ak", **kwargs)
                 else:
                     #file is parquet 
-                    awk_arrays[sample] = dak.from_parquet(paths)
+                    awk_arrays[sample] = dak.from_parquet(paths, **kwargs)
             else:
                 if is_root==True:
                     # Use uproot.iterate to handle URLs and local paths files in chunks
-                    tmp_arrays = list(uproot.iterate(paths, library="ak", **uproot_kwargs))
+                    tmp_arrays = list(uproot.iterate(paths, library="ak", **kwargs))
                     # Merge arrays
                     awk_arrays[sample] = ak.concatenate(tmp_arrays) 
                 else:
                     #file is parquet 
-                    awk_arrays[sample] = ak.from_parquet(paths)
+                    awk_arrays[sample] = ak.from_parquet(paths, **kwargs)
 
 
         except Exception as e:

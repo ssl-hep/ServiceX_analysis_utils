@@ -59,7 +59,7 @@ def test_to_awk_collection(build_test_samples):
     assert ak.all(arr1['branch2'] == ak.from_numpy(np.zeros(100)))
     assert ak.all(arr2['branch1'] == ak.from_numpy(np.ones(10)))
 
-    # Checking kwargs (Expressions equivalent in Parquet)
-    result_filtered = to_awk(sx_dict, filter_name="branch1")  # Now using filter_name instead of expressions
+    # Checking kwargs 
+    result_filtered = to_awk(sx_dict, columns="branch1")  
     arr1_filtered = result_filtered["Test-Sample1"]
     assert ak.fields(arr1_filtered) == ['branch1']  # branch2 should be filtered out
