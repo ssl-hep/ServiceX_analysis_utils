@@ -5,7 +5,7 @@ import awkward as ak
 import dask_awkward as dak
 import logging
 import numpy as np
-import pyarrow.parquet as pq
+#import pyarrow.parquet as pq
 from servicex_analysis_utils.materialization import to_awk
 
 

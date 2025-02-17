@@ -49,9 +49,10 @@ def to_awk(deliver_dict, dask=False, **uproot_kwargs):
 
     for sample, paths in deliver_dict.items():
         #Check file type
-        if paths[0].endswith(".root"):
+        f_type=str(paths[0])
+        if f_type.endswith(".root"):
             is_root=True
-        elif paths[0].endswith(".parquet") or paths[0].endswith(".pq"):
+        elif f_type.endswith(".parquet") or f_type.endswith(".pq"):
             is_root=False 
             # ServiceX supports only root/parquet in transformed files
         else:
@@ -72,6 +73,7 @@ def to_awk(deliver_dict, dask=False, **uproot_kwargs):
                     # Merge arrays
                     awk_arrays[sample] = ak.concatenate(tmp_arrays) 
                 else:
+                    #file is parquet 
                     awk_arrays[sample] = ak.from_parquet(paths)
 
 
