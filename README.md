@@ -18,7 +18,7 @@ pip install servicex-analysis-utils
 
     
     Returns:
-        dict: keys are sample names and values are awkward arrays or dask-awkward arrays.
+        dict: keys are sample names and values are awkward arrays, uproot generator objects or dask-awkward arrays.
 ```
 
 ## Documentation

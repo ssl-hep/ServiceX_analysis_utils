@@ -69,8 +69,8 @@ def test_to_awk(build_test_samples):
 
     #Collecting all samples 
     assert list(result.keys())==["Test-Sample1", "Test-Sample2"]
-    arr1=result["Test-Sample1"]
-    arr2=result["Test-Sample2"]
+    arr1 = ak.concatenate(list(result["Test-Sample1"]))  # Materialize the generator from uproot.iterate  
+    arr2 = ak.concatenate(list(result["Test-Sample2"]))  
 
     #Collecting all branches
     assert ak.fields(arr1) == ['branch1', 'branch2']

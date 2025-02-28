@@ -42,7 +42,7 @@ def to_awk(deliver_dict, dask=False, **kwargs):
 
     
     Returns:
-        dict: keys are sample names and values are awkward arrays or dask-awkward arrays.
+        dict: keys are sample names and values are awkward arrays, uproot generator objects or dask-awkward arrays.
     """
   
     awk_arrays = {}
@@ -69,9 +69,7 @@ def to_awk(deliver_dict, dask=False, **kwargs):
             else:
                 if is_root==True:
                     # Use uproot.iterate to handle URLs and local paths files in chunks
-                    tmp_arrays = list(uproot.iterate(paths, library="ak", **kwargs))
-                    # Merge arrays
-                    awk_arrays[sample] = ak.concatenate(tmp_arrays) 
+                    awk_arrays[sample]=uproot.iterate(paths, library="ak", **kwargs) # not an ak array but a generator
                 else:
                     #file is parquet 
                     awk_arrays[sample] = ak.from_parquet(paths, **kwargs)
