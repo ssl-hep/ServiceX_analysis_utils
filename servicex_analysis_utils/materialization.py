@@ -30,7 +30,7 @@ import awkward as ak
 import dask_awkward as dak 
 import logging 
 
-def to_awk(deliver_dict, dask=False, **kwargs):
+def to_awk(deliver_dict, dask=False, iterator=False, **kwargs):
     """
     Load an awkward array from the deliver() output with uproot or uproot.dask.
 
@@ -38,6 +38,7 @@ def to_awk(deliver_dict, dask=False, **kwargs):
         deliver_dict (dict): Returned dictionary from servicex.deliver()
                             (keys are sample names, values are file paths or URLs).
         dask (bool):        Optional. Flag to load as dask-awkward array. Default is False
+        iterator(bool):      Optional. Flag to materialize the data into arrays or to return iterables with uproot.iterate
         **kwargs :   Optional. Additional keyword arguments passed to uproot.dask, uproot.iterate and from_parquet
 
     
@@ -69,7 +70,12 @@ def to_awk(deliver_dict, dask=False, **kwargs):
             else:
                 if is_root==True:
                     # Use uproot.iterate to handle URLs and local paths files in chunks
-                    awk_arrays[sample]=uproot.iterate(paths, library="ak", **kwargs) # not an ak array but a generator
+                    iterators=uproot.iterate(paths, library="ak", **kwargs)
+                    if iterator==True:
+                        awk_arrays[sample]= iterators #return iterators
+                    else :
+                        awk_arrays[sample]=ak.concatenate(list(iterators)) #return array
+    
                 else:
                     #file is parquet 
                     awk_arrays[sample] = ak.from_parquet(paths, **kwargs)

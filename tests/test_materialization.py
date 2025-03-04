@@ -34,6 +34,7 @@ import os
 import sys
 import numpy as np
 from servicex_analysis_utils.materialization import to_awk
+import types
 
 
 @pytest.fixture
@@ -69,8 +70,10 @@ def test_to_awk(build_test_samples):
 
     #Collecting all samples 
     assert list(result.keys())==["Test-Sample1", "Test-Sample2"]
-    arr1 = ak.concatenate(list(result["Test-Sample1"]))  # Materialize the generator from uproot.iterate  
-    arr2 = ak.concatenate(list(result["Test-Sample2"]))  
+    arr1 = result["Test-Sample1"]
+    arr2 = result["Test-Sample2"]
+ 
+  
 
     #Collecting all branches
     assert ak.fields(arr1) == ['branch1', 'branch2']
@@ -114,6 +117,25 @@ def test_to_awk_dask(build_test_samples):
     assert ak.all(arr1['branch2'].compute() == ak.from_numpy(np.zeros(100)))
     assert ak.all(arr2['branch1'].compute() == ak.from_numpy(np.ones(10)))
 
+def test_to_awk_delayed_and_kwargs(build_test_samples):
+    sx_dict = build_test_samples
+    result_delay = to_awk(sx_dict, iterator=True, expressions="branch1") #return iterable + selection kwarg
+        
+    #Checking iterator return type
+    assert isinstance(result_delay["Test-Sample1"], types.GeneratorType)  
+    assert isinstance(result_delay["Test-Sample2"], types.GeneratorType)  
+
+
+    arr1 = ak.concatenate(list(result_delay["Test-Sample1"]))  # Materialize the generator from uproot.iterate  
+    arr2 = ak.concatenate(list(result_delay["Test-Sample2"]))
+
+    #Checking materialization
+    assert isinstance(arr1, ak.Array), "to_awk(dask=True) does not produce an ak.Array instance"
+    assert isinstance(arr2, ak.Array), "to_awk(dask=True) does not produce an ak.Array instance"
+
+    #Checking only 1 branch selected
+    assert ak.fields(arr1) == ['branch1']
+    assert ak.fields(arr2) == ['branch1']
 
 def test_unsupported_file_format():
     fake_paths = {"fake-Sample": ["invalid_file.txt"]}
