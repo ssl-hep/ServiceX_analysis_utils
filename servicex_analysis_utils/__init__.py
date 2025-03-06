@@ -26,6 +26,7 @@
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 from .materialization import to_awk 
+from .file_peeking import get_structure
 
 __version__ = "1.0.b1"
 __all__ = ['to_awk']

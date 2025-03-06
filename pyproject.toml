@@ -11,6 +11,7 @@ readme = "README.md"
 license = { text = "BSD-3-Clause" }
 requires-python = ">=3.9"
 dependencies = [ 
+    "servicex",
     "uproot>=5.0",
     "awkward>=2.6",
     "dask-awkward>=2024.12.2",
