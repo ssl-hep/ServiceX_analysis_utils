@@ -4,3 +4,6 @@ __pycache__/
 
 #Distribution 
 dist/
+
+#ServiceX
+servicex.yaml
