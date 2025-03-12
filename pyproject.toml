@@ -36,5 +36,9 @@ test = [
     "pandas"
 ]
 
+[project.scripts]
+servicex-get-structure = "servicex_analysis_utils.cli:run_from_command"
+
+
 [tool.hatch.build.targets.wheel]
 packages = ["servicex_analysis_utils"]
