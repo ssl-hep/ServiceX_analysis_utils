@@ -27,5 +27,5 @@
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 from .materialization import to_awk 
 
-__version__ = "1.0.b1"
+__version__ = "1.0.0"
 __all__ = ['to_awk']
