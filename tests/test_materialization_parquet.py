@@ -6,7 +6,7 @@ import dask_awkward as dak
 import logging
 import numpy as np
 import pyarrow.parquet as pq
-from servicex_analysis_utils.materialization import to_awk
+from servicex_analysis_utils import to_awk
 
 
 @pytest.fixture

@@ -33,7 +33,7 @@ import logging
 import os
 import sys
 import numpy as np
-from servicex_analysis_utils.materialization import to_awk
+from servicex_analysis_utils import to_awk
 import types
 
 
@@ -66,7 +66,7 @@ def build_test_samples(tmp_path):
 #Test functions
 def test_to_awk(build_test_samples):
     sx_dict = build_test_samples
-    result = to_awk(sx_dict) #uproot.iterate expressions kwarg
+    result = to_awk(sx_dict) 
 
     #Collecting all samples 
     assert list(result.keys())==["Test-Sample1", "Test-Sample2"]
