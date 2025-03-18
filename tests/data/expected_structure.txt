@@ -1,0 +1,15 @@
+
+File structure of all samples with branch filter '':
+
+---------------------------
+📁 Sample: test_file
+---------------------------
+
+🌳 Tree: background
+   ├── Branches:
+   │   ├──  branch1 ; dtype: AsDtype('>f8')
+   │   ├──  branch2 ; dtype: AsDtype('>f8')
+
+🌳 Tree: signal
+   ├── Branches:
+   │   ├──  branch1 ; dtype: AsDtype('>f8')
