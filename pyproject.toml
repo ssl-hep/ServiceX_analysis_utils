@@ -33,7 +33,8 @@ test = [
     "pytest>=7.2.0",
     "numpy>=1.21", 
     "pyarrow>=8.0.0",
-    "pandas"
+    "pandas",
+    "miniopy-async==1.21.1"
 ]
 
 [project.scripts]
