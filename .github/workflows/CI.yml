@@ -21,8 +21,11 @@ jobs:
       - name: Lint with Flake8
         run: |
           pipx run flake8
-          
+
   test:
+    needs:
+      - flake8
+  
     runs-on: ubuntu-latest
 
     steps:

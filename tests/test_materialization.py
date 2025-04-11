@@ -26,10 +26,10 @@
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 import pytest
-import uproot 
+import uproot
 import awkward as ak
-import dask_awkward as dak 
-import logging 
+import dask_awkward as dak
+import logging
 import os
 import sys
 import numpy as np
@@ -43,113 +43,119 @@ def build_test_samples(tmp_path):
     test_path1 = str(tmp_path / "test_file1.root")
     test_path2 = str(tmp_path / "test_file2.root")
     # example data for two branches
-    tree_data1 = {
-    "branch1": np.ones(100),
-    "branch2": np.zeros(100)
-    }
+    tree_data1 = {"branch1": np.ones(100), "branch2": np.zeros(100)}
     # example data for one branch
-    tree_data2 = {"branch1": np.ones(10)}  
+    tree_data2 = {"branch1": np.ones(10)}
 
     # Create tmp .root files
     with uproot.create(test_path1) as file:
         file["Tree"] = tree_data1
-    
+
     with uproot.create(test_path2) as file:
         file["Tree"] = tree_data2
 
-    #Dict like servicex.deliver() output
+    # Dict like servicex.deliver() output
     sx_dict = {"Test-Sample1": [test_path1], "Test-Sample2": [test_path2]}
 
     return sx_dict
 
 
-#Test functions
+# Test functions
 def test_to_awk(build_test_samples):
     sx_dict = build_test_samples
-    result = to_awk(sx_dict) #uproot.iterate expressions kwarg
+    result = to_awk(sx_dict)  # uproot.iterate expressions kwarg
 
-    #Collecting all samples 
-    assert list(result.keys())==["Test-Sample1", "Test-Sample2"]
+    # Collecting all samples
+    assert list(result.keys()) == ["Test-Sample1", "Test-Sample2"]
     arr1 = result["Test-Sample1"]
     arr2 = result["Test-Sample2"]
- 
-  
 
-    #Collecting all branches
-    assert ak.fields(arr1) == ['branch1', 'branch2']
-    assert ak.fields(arr2) == ['branch1']
-    
-    assert isinstance(arr1, ak.Array), "to_awk() does not produce an awkward.Array instance"
-    assert isinstance(arr2, ak.Array), "to_awk() does not produce an awkward.Array instance"
-  
-    #Collecting all elements per branch
-    assert ak.all(arr1['branch2'] == ak.from_numpy(np.zeros(100)))
-    assert ak.all(arr2['branch1'] == ak.from_numpy(np.ones(10)))
+    # Collecting all branches
+    assert ak.fields(arr1) == ["branch1", "branch2"]
+    assert ak.fields(arr2) == ["branch1"]
 
-    #Checking kwargs
-    result_filtered = to_awk(sx_dict, expressions="branch1") #uproot.iterate expressions kwarg
-    arr1_filtered=result_filtered["Test-Sample1"]
-    assert ak.fields(arr1_filtered) == ['branch1'] #branch2 should be filtered out
+    assert isinstance(
+        arr1, ak.Array
+    ), "to_awk() does not produce an awkward.Array instance"
+    assert isinstance(
+        arr2, ak.Array
+    ), "to_awk() does not produce an awkward.Array instance"
+
+    # Collecting all elements per branch
+    assert ak.all(arr1["branch2"] == ak.from_numpy(np.zeros(100)))
+    assert ak.all(arr2["branch1"] == ak.from_numpy(np.ones(10)))
+
+    # Checking kwargs
+    result_filtered = to_awk(
+        sx_dict, expressions="branch1"
+    )  # uproot.iterate expressions kwarg
+    arr1_filtered = result_filtered["Test-Sample1"]
+    assert ak.fields(arr1_filtered) == ["branch1"]  # branch2 should be filtered out
 
 
 def test_to_awk_dask(build_test_samples):
     sx_dict = build_test_samples
-    result_da = to_awk(sx_dict, dask=True, step_size=10) #uproot.dask step_size kwarg
-    
-    #Collecting all samples 
-    assert list(result_da.keys())==["Test-Sample1", "Test-Sample2"]
-    arr1=result_da["Test-Sample1"]
-    arr2=result_da["Test-Sample2"]
+    result_da = to_awk(sx_dict, dask=True, step_size=10)  # uproot.dask step_size kwarg
 
-    #Checking instance
-    assert isinstance(arr1, dak.Array), "to_awk(dask=True) does not produce an dak.Array instance"
-    assert isinstance(arr2, dak.Array), "to_awk(dask=True) does not produce an dak.Array instance"
+    # Collecting all samples
+    assert list(result_da.keys()) == ["Test-Sample1", "Test-Sample2"]
+    arr1 = result_da["Test-Sample1"]
+    arr2 = result_da["Test-Sample2"]
 
-    #Testing partitionning kwarg
+    # Checking instance
+    assert isinstance(
+        arr1, dak.Array
+    ), "to_awk(dask=True) does not produce an dak.Array instance"
+    assert isinstance(
+        arr2, dak.Array
+    ), "to_awk(dask=True) does not produce an dak.Array instance"
+
+    # Testing partitionning kwarg
     assert arr1.npartitions == 10
     assert arr2.npartitions == 1
 
-    #Collecting all branches
-    assert ak.fields(arr1) == ['branch1', 'branch2']
-    assert ak.fields(arr2) == ['branch1']
+    # Collecting all branches
+    assert ak.fields(arr1) == ["branch1", "branch2"]
+    assert ak.fields(arr2) == ["branch1"]
 
-    #Collecting all elements per branch
-    assert ak.all(arr1['branch2'].compute() == ak.from_numpy(np.zeros(100)))
-    assert ak.all(arr2['branch1'].compute() == ak.from_numpy(np.ones(10)))
+    # Collecting all elements per branch
+    assert ak.all(arr1["branch2"].compute() == ak.from_numpy(np.zeros(100)))
+    assert ak.all(arr2["branch1"].compute() == ak.from_numpy(np.ones(10)))
+
 
 def test_to_awk_delayed_and_kwargs(build_test_samples):
     sx_dict = build_test_samples
-    result_delay = to_awk(sx_dict, iterator=True, expressions="branch1") #return iterable + selection kwarg
-        
-    #Checking iterator return type
-    assert isinstance(result_delay["Test-Sample1"], types.GeneratorType)  
-    assert isinstance(result_delay["Test-Sample2"], types.GeneratorType)  
+    result_delay = to_awk(
+        sx_dict, iterator=True, expressions="branch1"
+    )  # return iterable + selection kwarg
 
+    # Checking iterator return type
+    assert isinstance(result_delay["Test-Sample1"], types.GeneratorType)
+    assert isinstance(result_delay["Test-Sample2"], types.GeneratorType)
 
-    arr1 = ak.concatenate(list(result_delay["Test-Sample1"]))  # Materialize the generator from uproot.iterate  
+    arr1 = ak.concatenate(
+        list(result_delay["Test-Sample1"])
+    )  # Materialize the generator from uproot.iterate
     arr2 = ak.concatenate(list(result_delay["Test-Sample2"]))
 
-    #Checking materialization
-    assert isinstance(arr1, ak.Array), "to_awk(dask=True) does not produce an ak.Array instance"
-    assert isinstance(arr2, ak.Array), "to_awk(dask=True) does not produce an ak.Array instance"
+    # Checking materialization
+    assert isinstance(
+        arr1, ak.Array
+    ), "to_awk(dask=True) does not produce an ak.Array instance"
+    assert isinstance(
+        arr2, ak.Array
+    ), "to_awk(dask=True) does not produce an ak.Array instance"
 
-    #Checking only 1 branch selected
-    assert ak.fields(arr1) == ['branch1']
-    assert ak.fields(arr2) == ['branch1']
+    # Checking only 1 branch selected
+    assert ak.fields(arr1) == ["branch1"]
+    assert ak.fields(arr2) == ["branch1"]
+
 
 def test_unsupported_file_format():
     fake_paths = {"fake-Sample": ["invalid_file.txt"]}
     # match is regex-level
-    with pytest.raises(ValueError, match=r"Unsupported file format: 'invalid_file.txt'\. Files must be ROOT \(.*\) or Parquet \(.*\)"):
+    with pytest.raises(
+        ValueError,
+        match=r"Unsupported file format: 'invalid_file.txt'\. Files must be ROOT \(.*\) or Parquet \(.*\)",
+    ):
         to_awk(fake_paths)
-
-
-
-
-
-
-
-
-
-    
-

@@ -18,18 +18,13 @@ def build_test_samples(tmp_path):
     test_path2 = str(tmp_path / "test_file2.parquet")
 
     # Example data for two branches
-    data1 = ak.Array({
-        "branch1": np.ones(100),
-        "branch2": np.zeros(100)
-    })
-    
+    data1 = ak.Array({"branch1": np.ones(100), "branch2": np.zeros(100)})
+
     # Example data for one branch
-    data2 = ak.Array({
-        "branch1": np.ones(10)
-    })
+    data2 = ak.Array({"branch1": np.ones(10)})
 
     # Write to Parquet files
-    ak.to_parquet(data1, test_path1, row_group_size=10) #partions
+    ak.to_parquet(data1, test_path1, row_group_size=10)  # partions
     ak.to_parquet(data2, test_path2)
 
     # Dict simulating servicex.deliver() output
@@ -49,42 +44,51 @@ def test_to_awk_parquet(build_test_samples):
     arr2 = result["Test-Sample2"]
 
     # Collecting all branches
-    assert ak.fields(arr1) == ['branch1', 'branch2']
-    assert ak.fields(arr2) == ['branch1']
+    assert ak.fields(arr1) == ["branch1", "branch2"]
+    assert ak.fields(arr2) == ["branch1"]
 
-    assert isinstance(arr1, ak.Array), "to_awk() does not produce an awkward.Array instance"
-    assert isinstance(arr2, ak.Array), "to_awk() does not produce an awkward.Array instance"
+    assert isinstance(
+        arr1, ak.Array
+    ), "to_awk() does not produce an awkward.Array instance"
+    assert isinstance(
+        arr2, ak.Array
+    ), "to_awk() does not produce an awkward.Array instance"
 
     # Collecting all elements per branch
-    assert ak.all(arr1['branch2'] == ak.from_numpy(np.zeros(100)))
-    assert ak.all(arr2['branch1'] == ak.from_numpy(np.ones(10)))
+    assert ak.all(arr1["branch2"] == ak.from_numpy(np.zeros(100)))
+    assert ak.all(arr2["branch1"] == ak.from_numpy(np.ones(10)))
 
-    # Checking kwargs 
-    result_filtered = to_awk(sx_dict, columns="branch1")  
+    # Checking kwargs
+    result_filtered = to_awk(sx_dict, columns="branch1")
     arr1_filtered = result_filtered["Test-Sample1"]
-    assert ak.fields(arr1_filtered) == ['branch1']  # branch2 should be filtered out
+    assert ak.fields(arr1_filtered) == ["branch1"]  # branch2 should be filtered out
+
 
 def test_to_awk_dask_parquet(build_test_samples):
     sx_dict = build_test_samples
-    result_da = to_awk(sx_dict, dask=True, split_row_groups=True) #split in partitions
-    
-    #Collecting all samples 
-    assert list(result_da.keys())==["Test-Sample1", "Test-Sample2"]
-    arr1=result_da["Test-Sample1"]
-    arr2=result_da["Test-Sample2"]
+    result_da = to_awk(sx_dict, dask=True, split_row_groups=True)  # split in partitions
 
-    #Checking instance
-    assert isinstance(arr1, dak.Array), "to_awk(dask=True) does not produce an dak.Array instance"
-    assert isinstance(arr2, dak.Array), "to_awk(dask=True) does not produce an dak.Array instance"
+    # Collecting all samples
+    assert list(result_da.keys()) == ["Test-Sample1", "Test-Sample2"]
+    arr1 = result_da["Test-Sample1"]
+    arr2 = result_da["Test-Sample2"]
 
-    #Testing partitionning kwarg
+    # Checking instance
+    assert isinstance(
+        arr1, dak.Array
+    ), "to_awk(dask=True) does not produce an dak.Array instance"
+    assert isinstance(
+        arr2, dak.Array
+    ), "to_awk(dask=True) does not produce an dak.Array instance"
+
+    # Testing partitionning kwarg
     assert arr1.npartitions == 10
     assert arr2.npartitions == 1
 
-    #Collecting all branches
-    assert ak.fields(arr1) == ['branch1', 'branch2']
-    assert ak.fields(arr2) == ['branch1']
+    # Collecting all branches
+    assert ak.fields(arr1) == ["branch1", "branch2"]
+    assert ak.fields(arr2) == ["branch1"]
 
-    #Collecting all elements per branch
-    assert ak.all(arr1['branch2'].compute() == ak.from_numpy(np.zeros(100)))
-    assert ak.all(arr2['branch1'].compute() == ak.from_numpy(np.ones(10)))
+    # Collecting all elements per branch
+    assert ak.all(arr1["branch2"].compute() == ak.from_numpy(np.zeros(100)))
+    assert ak.all(arr2["branch1"].compute() == ak.from_numpy(np.ones(10)))
