@@ -7,7 +7,7 @@ on:
   
 jobs:
 
-  flake8:
+  black-format:
     runs-on: ubuntu-latest
 
     steps:
@@ -24,7 +24,7 @@ jobs:
 
   test:
     needs:
-      - flake8
+      - black-format
   
     runs-on: ubuntu-latest
 
