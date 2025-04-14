@@ -18,9 +18,9 @@ jobs:
         with:
           python-version: "3.x"
 
-      - name: Lint with Flake8
+      - name: Run Black
         run: |
-          pipx run flake8
+          pipx run black --check .
 
   test:
     needs:
