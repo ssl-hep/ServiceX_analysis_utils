@@ -33,7 +33,7 @@ import logging
 import os
 import sys
 import numpy as np
-from servicex_analysis_utils.materialization import to_awk
+from servicex_analysis_utils import to_awk
 import types
 
 
