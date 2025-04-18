@@ -7,3 +7,10 @@ servicex.yaml
 
 #Distribution 
 dist/
+
+#ServiceX
+servicex.yaml
+
+#Testing 
+samples_structure.txt
+

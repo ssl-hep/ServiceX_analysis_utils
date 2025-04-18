@@ -11,6 +11,7 @@ readme = "README.md"
 license = { text = "BSD-3-Clause" }
 requires-python = ">=3.9"
 dependencies = [ 
+    "servicex",
     "uproot>=5.0",
     "awkward>=2.6",
     "dask-awkward>=2024.12.2",
@@ -32,8 +33,13 @@ test = [
     "pytest>=7.2.0",
     "numpy>=1.21", 
     "pyarrow>=8.0.0",
-    "pandas"
+    "pandas",
+    "miniopy-async==1.21.1"
 ]
+
+[project.scripts]
+servicex-get-structure = "servicex_analysis_utils.cli:app"
+
 
 [tool.hatch.build.targets.wheel]
 packages = ["servicex_analysis_utils"]

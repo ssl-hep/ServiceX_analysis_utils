@@ -27,8 +27,9 @@
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 import uproot
 import awkward as ak
-import dask_awkward as dak 
-import logging 
+import dask_awkward as dak
+import logging
+
 
 def to_awk(deliver_dict, dask=False, iterator=False, **kwargs):
     """
@@ -41,49 +42,52 @@ def to_awk(deliver_dict, dask=False, iterator=False, **kwargs):
         iterator(bool):      Optional. Flag to materialize the data into arrays or to return iterables with uproot.iterate
         **kwargs :   Optional. Additional keyword arguments passed to uproot.dask, uproot.iterate and from_parquet
 
-    
+
     Returns:
         dict: keys are sample names and values are awkward arrays, uproot generator objects or dask-awkward arrays.
     """
-  
+
     awk_arrays = {}
 
     for sample, paths in deliver_dict.items():
-        #Check file type
-        f_type=str(paths[0])
+        # Check file type
+        f_type = str(paths[0])
         if f_type.endswith(".root"):
-            is_root=True
+            is_root = True
         elif f_type.endswith(".parquet") or f_type.endswith(".pq"):
-            is_root=False 
+            is_root = False
             # ServiceX supports only root/parquet in transformed files
         else:
-            raise ValueError(f"Unsupported file format: '{paths[0]}'. Files must be ROOT (.root) or Parquet (.parquet, .pq)")
-        
+            raise ValueError(
+                f"Unsupported file format: '{paths[0]}'. Files must be ROOT (.root) or Parquet (.parquet, .pq)"
+            )
+
         try:
             if dask:
-                if is_root==True:
-                    # Use uproot.dask to handle URLs and local paths lazily 
+                if is_root == True:
+                    # Use uproot.dask to handle URLs and local paths lazily
                     awk_arrays[sample] = uproot.dask(paths, library="ak", **kwargs)
                 else:
-                    #file is parquet 
+                    # file is parquet
                     awk_arrays[sample] = dak.from_parquet(paths, **kwargs)
             else:
-                if is_root==True:
+                if is_root == True:
                     # Use uproot.iterate to handle URLs and local paths files in chunks
-                    iterators=uproot.iterate(paths, library="ak", **kwargs)
-                    if iterator==True:
-                        awk_arrays[sample]= iterators #return iterators
-                    else :
-                        awk_arrays[sample]=ak.concatenate(list(iterators)) #return array
-    
+                    iterators = uproot.iterate(paths, library="ak", **kwargs)
+                    if iterator == True:
+                        awk_arrays[sample] = iterators  # return iterators
+                    else:
+                        awk_arrays[sample] = ak.concatenate(
+                            list(iterators)
+                        )  # return array
+
                 else:
-                    #file is parquet 
+                    # file is parquet
                     awk_arrays[sample] = ak.from_parquet(paths, **kwargs)
 
-
         except Exception as e:
-            # Log the exception pointing at the user's code 
-            msg=f"\nError loading sample: {sample}"
+            # Log the exception pointing at the user's code
+            msg = f"\nError loading sample: {sample}"
             logging.error(msg, exc_info=True, stacklevel=2)
             # Mark the sample as failed
             awk_arrays[sample] = None
