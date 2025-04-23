@@ -29,12 +29,23 @@ jobs:
     - name: Set env
       run: echo "RELEASE_VERSION=${GITHUB_REF#refs/*/}" >> $GITHUB_ENV
 
+    - name: Print RELEASE_VERSION
+      run: echo "${{ env.RELEASE_VERSION }}"
+
+    - name: Show version lines
+      run: |
+        grep 'version =' pyproject.toml
+        grep '__version__' servicex_analysis_utils/__init__.py
 
     - name: Update Version
       run: |
         sed -i '/version =/ s/= "[^"][^"]*"/ = "${{ env.RELEASE_VERSION }}"/' pyproject.toml
         sed -i '/__version__ =/ s/= "[^"][^"]*"/ = "${{ env.RELEASE_VERSION }}"/' servicex_analysis_utils/__init__.py
 
+    - name: Show updated version lines
+      run: |
+          grep 'version =' pyproject.toml
+          grep '__version__' servicex_analysis_utils/__init__.py
 
     - name: Build a sdist and wheel
       run: |
@@ -111,7 +122,7 @@ jobs:
       run: |
         git config --local user.name "github-actions[bot]"
         git config --local user.email "github-actions[bot]@users.noreply.github.com"
-        git add pyproject.toml servicex_analysis_utils/__init__.py
+        git add ./pyproject.toml servicex_analysis_utils/__init__.py
 
         # Check if there are changes to commit
         if ! git diff --cached --quiet; then
