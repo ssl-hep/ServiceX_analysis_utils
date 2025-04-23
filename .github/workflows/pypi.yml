@@ -104,7 +104,7 @@ jobs:
     - name: Update version in pyproject.toml and __init__.py
       run: |
         sed -i '/version =/ s/= "[^"][^"]*"/ = "${{ env.RELEASE_VERSION }}"/' pyproject.toml
-        sed -i '/__version__ =/ s/= "[^"][^"]*"/ = "${{ env.RELEASE_VERSION }}"/' servicex_analysis_utils/__init__.py
+        sed -i '/__version__ =/ s/__version__ = "[^"]*"/__version__="${{ env.RELEASE_VERSION }}"/' servicex_analysis_utils/__init__.py
 
 
     - name: Commit version change
