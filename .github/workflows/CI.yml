@@ -6,7 +6,26 @@ on:
   workflow_dispatch:
   
 jobs:
+
+  black-format:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.x"
+
+      - name: Run Black
+        run: |
+          pipx run black --check .
+
   test:
+    needs:
+      - black-format
+  
     runs-on: ubuntu-latest
 
     steps:
