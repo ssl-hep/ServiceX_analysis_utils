@@ -81,7 +81,9 @@ jobs:
         print-hash: true
   
   commit-version-bump:
-    needs: build, publish
+    needs: 
+      - build 
+      - publish
     runs-on: ubuntu-latest
     permissions:
       contents: write  # required to push with GITHUB_TOKEN
