@@ -80,7 +80,7 @@ jobs:
       with:
         print-hash: true
   
-  commit version bump:
+  commit-version-bump:
     needs: build, publish
     runs-on: ubuntu-latest
     permissions:
