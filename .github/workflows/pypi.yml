@@ -75,8 +75,7 @@ jobs:
         path: dist
 
     - name: Publish distribution 
-      if: github.repository == 'ssl-hep/ServiceX_analysis_utils'
-      if: github.ref == 'refs/heads/main'
+      if: ${{ github.repository == 'ssl-hep/ServiceX_analysis_utils' && github.ref == 'refs/heads/main' }}
       uses: pypa/gh-action-pypi-publish@v1.12.3
       with:
         print-hash: true
