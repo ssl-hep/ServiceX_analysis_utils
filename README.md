@@ -1,12 +1,15 @@
 # ServiceX analysis utils
-This repository provides analysis tools to be used with the [ServiceX Client](https://github.com/ssl-hep/ServiceX_frontend/tree/master)
+This repository hosts tools that depend on the [ServiceX Client](https://github.com/ssl-hep/ServiceX_frontend/tree/master). These tools facilitate `ServiceX`'s general usage and offer specific features that replace parts of an analyser workflow.
 
 ### To install 
 ```
 pip install servicex-analysis-utils
 ```
+#### Requirements
+This package depends requires a `servicex.yml` configuration file granting access to one endpoint with a deployed ServiceX backend.
 
-##### This package contains the to_awk() function:
+### This package contains: 
+#### `to_awk()`:
 ```
 Load an awkward array from the deliver() output with uproot or uproot.dask.
 
@@ -20,6 +23,25 @@ Parameters:
 
 Returns:
     dict: keys are sample names and values are awkward arrays, uproot generator objects or dask-awkward arrays.
+```
+
+
+#### `get-structure()`:
+
+```
+    Creates and sends the ServiceX request from user inputed datasets to retrieve file stucture.
+    Calls print_structure_from_str() to dump the structure in a user-friendly format
+
+    Parameters:
+      datasets (dict,str,[str]): The datasets from which to print the file structures.
+                                 A name can be given as the key of each dataset in a dictionary  
+      kwargs : Arguments to be propagated to print_structure_from_str, e.g filter_branch
+```
+
+Function can be called from the command line, e.g: 
+
+```
+$ servicex-get-structure "mc23_13TeV:some-dataset-rucio-id" --filter_branch "truth"
 ```
 
 ## Documentation
