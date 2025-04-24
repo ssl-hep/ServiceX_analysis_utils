@@ -52,9 +52,9 @@ def to_awk(deliver_dict, dask=False, iterator=False, **kwargs):
     for sample, paths in deliver_dict.items():
         # Check file type
         f_type = str(paths[0])
-        if f_type.endswith(".root"):
+        if ".root" in f_type:
             is_root = True
-        elif f_type.endswith(".parquet") or f_type.endswith(".pq"):
+        elif ".parquet" or ".pq" in f_type:
             is_root = False
             # ServiceX supports only root/parquet in transformed files
         else:
