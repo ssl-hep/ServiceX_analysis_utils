@@ -45,4 +45,4 @@ $ servicex-get-structure "mc23_13TeV:some-dataset-rucio-id" --filter_branch "tru
 ```
 
 ## Documentation
-The different functions are documented in TBD 
+The different functions are documented in [readthedcos](https://servicex-analysis-utils.readthedocs.io/en/latest/file_introspecting.html) 
