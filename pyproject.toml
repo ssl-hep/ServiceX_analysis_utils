@@ -37,6 +37,13 @@ test = [
     "miniopy-async==1.21.1"
 ]
 
+docs = [
+    "sphinx>=5.0",
+    "sphinx-copybutton",
+    "myst-parser",
+    "furo",
+]
+
 [project.scripts]
 servicex-get-structure = "servicex_analysis_utils.cli:app"
 
