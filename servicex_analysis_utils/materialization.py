@@ -47,9 +47,14 @@ def to_awk(deliver_dict, dask=False, iterator=False, **kwargs):
         dict: keys are sample names and values are awkward arrays, uproot generator objects or dask-awkward arrays.
     """
 
+    if not deliver_dict:
+        raise ValueError("Input dict from servicex.deliver cannot be empty.")
+
     awk_arrays = {}
 
     for sample, paths in deliver_dict.items():
+        if not paths:
+            raise ValueError(f"ServiceX result path list for {sample} cannot be empty.")
         # Check file type
         f_type = str(paths[0])
         if ".root" in f_type:

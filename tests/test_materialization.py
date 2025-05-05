@@ -159,3 +159,19 @@ def test_unsupported_file_format():
         match=r"Unsupported file format: 'invalid_file.txt'\. Files must be ROOT \(.*\) or Parquet \(.*\)",
     ):
         to_awk(fake_paths)
+
+
+def test_empty_deliver_dict():
+    empty_dict = {}
+    with pytest.raises(
+        ValueError, match="Input dict from servicex.deliver cannot be empty."
+    ):
+        to_awk(empty_dict)
+
+
+def test_deliver_dict_empty_paths():
+    empty_dict = {"empty-Sample": []}
+    with pytest.raises(
+        ValueError, match="ServiceX result path list for empty-Sample cannot be empty."
+    ):
+        to_awk(empty_dict)
