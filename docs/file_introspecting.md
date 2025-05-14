@@ -163,5 +163,5 @@ Type for branch 'runNumber': var * int64
 ## Notes
 
 - The function does not retrieve event data — only structure/metadata.
-- CLI output is printed directly to stdout but can be routed to a file with ` > structure_summary.txt` 
+- When using `json` input to the CLI, the same branch filtering will be applied to all samples.
 - Many types will show as None or unknown when they are not interpretable by the uproot or fail to be reconstructed to ak.arrays
