@@ -82,7 +82,7 @@ def build_typetracer(form):
     """
     stamped_form = add_keys(form)
 
-    tracer, report = ak.typetracer.TypeTracer(
+    tracer, report = ak.typetracer.typetracer_with_report(
         stamped_form,
         buffer_key=is_branch_buffer,
         highlevel=True,
