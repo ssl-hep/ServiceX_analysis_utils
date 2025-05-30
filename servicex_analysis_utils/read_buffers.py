@@ -27,7 +27,7 @@
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 import awkward as ak
-from awkward.forms import RecordForm, NumpyForm, ListOffsetForm
+from awkward.forms import RecordForm
 
 
 def add_keys(original_form):
@@ -70,7 +70,7 @@ def is_branch_buffer(form_key, attribute, form):
     return f"{form_key}"
 
 
-def build_typetracer(form):
+def build_typetracer_with_report(form):
     """
     Build a typetracer from an awkward form, adding keys to the RecordForm and ListOffsetForm.
 
@@ -92,7 +92,7 @@ def build_typetracer(form):
     return tracer, report
 
 
-def necessary_branches(report):
+def get_necessary_branches(report):
     """
     Utility function to get the necessary branches from a typetracer report.
 
