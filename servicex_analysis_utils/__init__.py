@@ -27,7 +27,7 @@
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 from .materialization import to_awk
 from .file_peeking import get_structure
-from .read_buffers import necessary_branches
+from .read_buffers import get_necessary_branches
 
 __version__ = "1.0.2"
-__all__ = ["to_awk", "get_structure", "necessary_branches"]
+__all__ = ["to_awk", "get_structure", "get_necessary_branches"]
