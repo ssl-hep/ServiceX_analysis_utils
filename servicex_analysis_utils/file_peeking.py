@@ -39,22 +39,11 @@ def run_query(input_filenames):
     import awkward as ak
     import json
 
-    def is_tree(obj):
-        """Helper to check if a root file item is TTree."""
-        if hasattr(obj, "classname"):
-            cls_attr = obj.classname
-            cls_value = cls_attr() if callable(cls_attr) else cls_attr
-            return "TTree" in cls_value
-        elif hasattr(obj, "classnames"):
-            cls_attr = obj.classnames
-            cls_values = cls_attr() if callable(cls_attr) else cls_attr
-            return any("TTree" in cls for cls in cls_values)
-        return False
+    """
+    Opens a ROOT file and returns a JSON-formatted string describing each tree's layout form and type.
+    This function is ran by trasnformers in the ServiceX backend.
+    """
 
-    """
-    Opens a ROOT file and returns a JSON-formatted string describing the structure,
-    encoded inside an ak.Array for ServiceX.
-    """
     tree_dict = {}
 
     with uproot.open(input_filenames) as file:
@@ -62,20 +51,23 @@ def run_query(input_filenames):
             tree_name_clean = tree_name.rstrip(";1")
             tree = file[tree_name]
 
-            if not is_tree(tree):
+            # Skip non-TTree objects
+            if not hasattr(tree, "arrays"):
                 continue
 
-            branch_dict = {}
-            for branch_name, branch in tree.items():
-                branch_type = str(branch.interpretation)
-                branch_dict[branch_name] = branch_type
+            # Load a minimal awkward array (only 1 event)
+            try:
+                array = tree.arrays(entry_stop=1, library="ak")
+            except Exception:
+                continue  # In case array reading fails, skip tree
 
-            tree_dict[tree_name_clean] = branch_dict
+            tree_dict[tree_name_clean] = {
+                "form": array.layout.form.to_dict(),  # full layout form
+                "type": str(array.type),  # human-readable type
+            }
 
-    # Serialize tree_dict to JSON string
+    # Serialize as JSON and wrap in ak.Array
     json_str = json.dumps(tree_dict)
-
-    # Return JSON string wrapped in an awkward array
     return ak.Array([json_str])
 
 
