@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "servicex_analysis_utils"
-version = "1.0.0"
+version = "1.0.2"
 description = "A package with analysis tools for ServiceX."
 authors = [{name = "Artur Cordeiro Oudot Choi", email = "acordeir@cern.ch"}]
 readme = "README.md"
@@ -35,6 +35,13 @@ test = [
     "pyarrow>=8.0.0",
     "pandas",
     "miniopy-async==1.21.1"
+]
+
+docs = [
+    "sphinx>=5.0",
+    "sphinx-copybutton",
+    "myst-parser",
+    "furo",
 ]
 
 [project.scripts]

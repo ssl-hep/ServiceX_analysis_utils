@@ -1,0 +1,127 @@
+name: Publish package to PyPi
+
+on:
+  release:
+    types: [released, prereleased]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
+    - name: Set up Python 3.12
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.12'
+
+    - name: Install uv
+      uses: astral-sh/setup-uv@v5
+
+    - name: Install python-build and twine
+      run: |
+        uv pip install --system build twine
+        uv pip list --system
+
+    - name: Set env
+      run: echo "RELEASE_VERSION=${GITHUB_REF#refs/*/}" >> $GITHUB_ENV
+
+    - name: Update Version
+      run: |
+        sed -i 's/^version\s*=\s*".*"/version = "${{ env.RELEASE_VERSION }}"/' pyproject.toml
+        sed -i '/__version__/ s/__version__\s*=.*/__version__ = "${{ env.RELEASE_VERSION }}"/' servicex_analysis_utils/__init__.py
+
+
+    - name: Build a sdist and wheel
+      run: |
+        python -m build .
+
+    - name: Check dist
+      run: twine check --strict dist/*
+
+    - name: List contents of sdist
+      run: python -m tarfile --list dist/servicex_analysis_utils-*.tar.gz
+
+    - name: List contents of wheel
+      run: python -m zipfile --list dist/servicex_analysis_utils-*.whl
+
+    - name: Upload an artifact of dist
+      uses: actions/upload-artifact@v4
+      with:
+        name: dist-gha-artifact
+        path: dist
+
+  publish:
+    needs: build
+    runs-on: ubuntu-latest  
+
+    permissions:
+      id-token: write  # required to push with trusted-pypi-token
+    
+    steps:
+    - name: Set up Python 3.12
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.12'
+
+    - name: Download artifact
+      uses: actions/download-artifact@v4
+      with:
+        name: dist-gha-artifact
+        path: dist
+
+    - name: Publish distribution 
+      uses: pypa/gh-action-pypi-publish@v1.12.3
+      with:
+        print-hash: true
+  
+  commit-version-bump:
+    needs: 
+      - build 
+      - publish
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write  # required to push with GITHUB_TOKEN
+
+    steps:
+    - name: Checkout main branch
+      uses: actions/checkout@v4
+      with:
+        ref: main 
+
+    - name: Set up Python 3.12
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.12'
+
+    - name: Set env
+      run: echo "RELEASE_VERSION=${GITHUB_REF#refs/*/}" >> $GITHUB_ENV
+
+    - name: Update version to commit
+      run: |
+        sed -i 's/^version\s*=\s*".*"/version = "${{ env.RELEASE_VERSION }}"/' pyproject.toml
+        sed -i '/__version__/ s/__version__\s*=.*/__version__ = "${{ env.RELEASE_VERSION }}"/' servicex_analysis_utils/__init__.py
+
+
+    - name: Commit version change
+      run: |
+        git config --local user.name "github-actions[bot]"
+        git config --local user.email "github-actions[bot]@users.noreply.github.com"
+        git add ./pyproject.toml servicex_analysis_utils/__init__.py
+
+        # Check if there are changes to commit
+        if ! git diff --cached --quiet; then
+          echo "Changes detected, committing..."
+          git commit -m "Update version to ${{ env.RELEASE_VERSION }}" --no-verify
+        else
+          echo "No changes to commit"
+        fi
+
+    - name: Push commit to main
+      # GITHUB_TOKEN is automatically provided
+      run: |
+        git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}
+        git push origin main
