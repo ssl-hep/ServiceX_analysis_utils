@@ -160,7 +160,7 @@ def print_structure_from_str(
 
     output_lines = []
     output_lines.append(
-        f"\nFile structure of all samples with branch filter '{filter_branch}':"
+        f"\nFile structure of all samples with branch filter '{filter_branch}':\n"
     )
 
     for sample_name, path in deliver_dict.items():
