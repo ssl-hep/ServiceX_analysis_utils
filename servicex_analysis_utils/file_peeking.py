@@ -212,7 +212,7 @@ def parse_jagged_depth_and_dtype(dtype_str):
         return depth, None
 
 
-def str_to_array(encoded_json_str):
+def str_to_array(encoded_json_str, return_form=False):
     """
     Helper to reconstruct ak.Arrays from a JSON-formatted file-structure string.
     Returns an array mimicking TTrees and TBranches with correct field names and dtypes.
@@ -251,7 +251,10 @@ def str_to_array(encoded_json_str):
         if branches:
             reconstructed_data[treename] = ak.Array([branches])
 
-    return ak.Array(reconstructed_data).type
+    if return_form:
+        return ak.Array(reconstructed_data).layout.form
+    else:
+        return ak.Array(reconstructed_data).type
 
 
 def get_structure(datasets, array_out=False, **kwargs):
@@ -274,7 +277,7 @@ def get_structure(datasets, array_out=False, **kwargs):
         for sample, path in output.items():
             with uproot.open(path[0]) as f:
                 structure_str = f["servicex"]["branch"].array()[0]
-            sample_array = str_to_array(structure_str)
+            sample_array = str_to_array(structure_str, **kwargs)
             all_arrays[sample] = sample_array
         return all_arrays
 
