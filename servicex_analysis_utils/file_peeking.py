@@ -212,7 +212,7 @@ def parse_jagged_depth_and_dtype(dtype_str):
         return depth, None
 
 
-def str_to_array(encoded_json_str, return_form=False):
+def str_to_array(encoded_json_str, tree_forms=False):
     """
     Helper to reconstruct ak.Arrays from a JSON-formatted file-structure string.
     Returns an array mimicking TTrees and TBranches with correct field names and dtypes.
@@ -223,7 +223,7 @@ def str_to_array(encoded_json_str, return_form=False):
     Returns:
         ak.Array: An array containing a dictionary of trees with branch structures and dummy typed values.
     """
-    reconstructed_data = {}
+    reconstructed_file_data = {}
     structure_dict = json.loads(encoded_json_str)
 
     for treename, branch_dict in structure_dict.items():
@@ -249,12 +249,17 @@ def str_to_array(encoded_json_str, return_form=False):
             branches[branch_name] = ak.Array([dummy])
 
         if branches:
-            reconstructed_data[treename] = ak.Array([branches])
+            reconstructed_file_data[treename] = ak.Array([branches])
 
-    if return_form:
-        return ak.Array(reconstructed_data).layout.form
+    if tree_forms:
+        # Dictionary of each tree's RecordForm
+        tree_forms = {
+            tree: arr.layout.form for tree, arr in reconstructed_file_data.items()
+        }
+        return tree_forms
     else:
-        return ak.Array(reconstructed_data).type
+        # ak.Array type with all trees and branches
+        return ak.Array(reconstructed_file_data).type
 
 
 def get_structure(datasets, array_out=False, **kwargs):
@@ -273,13 +278,13 @@ def get_structure(datasets, array_out=False, **kwargs):
     output = deliver(spec_python)
 
     if array_out == True:
-        all_arrays = {}
+        all_requests = {}
         for sample, path in output.items():
             with uproot.open(path[0]) as f:
                 structure_str = f["servicex"]["branch"].array()[0]
-            sample_array = str_to_array(structure_str, **kwargs)
-            all_arrays[sample] = sample_array
-        return all_arrays
+            ak_structure = str_to_array(structure_str, **kwargs)
+            all_requests[sample] = ak_structure
+        return all_requests
 
     else:
         return print_structure_from_str(output, **kwargs)
