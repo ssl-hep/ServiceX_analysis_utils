@@ -54,7 +54,9 @@ def to_awk(deliver_dict, dask=False, iterator=False, **kwargs):
 
     for sample, paths in deliver_dict.items():
         if not paths:
-            raise RuntimeError(f"Delivered result file path list for {sample} is empty.")
+            raise RuntimeError(
+                f"Delivered result file path list for {sample} is empty."
+            )
         # Check file type
         f_type = str(paths[0])
         if ".root" in f_type:
@@ -69,7 +71,7 @@ def to_awk(deliver_dict, dask=False, iterator=False, **kwargs):
 
         try:
             if dask:
-                if is_root == True: 
+                if is_root == True:
                     # Use uproot.dask to handle URLs and local paths lazily
                     awk_arrays[sample] = uproot.dask(paths, library="ak", **kwargs)
                 else:
