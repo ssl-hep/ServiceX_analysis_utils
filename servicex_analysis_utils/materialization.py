@@ -69,7 +69,7 @@ def to_awk(deliver_dict, dask=False, iterator=False, **kwargs):
 
         try:
             if dask:
-                if is_root == True:
+                if is_root == True: 
                     # Use uproot.dask to handle URLs and local paths lazily
                     awk_arrays[sample] = uproot.dask(paths, library="ak", **kwargs)
                 else:
