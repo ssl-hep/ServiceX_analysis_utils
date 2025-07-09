@@ -64,7 +64,7 @@ def to_awk(deliver_dict, dask=False, iterator=False, **kwargs):
             # ServiceX supports only root/parquet in transformed files
         else:
             raise RuntimeError(
-                f"Unsupported file format delivered by ServiceX: '{paths[0]}'. Files must be ROOT (.root) or Parquet (.parquet, .pq)"
+                f"Unsupported delivered format: '{paths[0]}'. Must be R .root or Parquet (.parquet, .pq)"
             )
 
         try:
