@@ -54,7 +54,7 @@ def to_awk(deliver_dict, dask=False, iterator=False, **kwargs):
 
     for sample, paths in deliver_dict.items():
         if not paths:
-            raise ValueError(f"ServiceX result path list for {sample} cannot be empty.")
+            raise RuntimeError(f"Delivered result file path list for {sample} is empty.")
         # Check file type
         f_type = str(paths[0])
         if ".root" in f_type:
@@ -63,8 +63,8 @@ def to_awk(deliver_dict, dask=False, iterator=False, **kwargs):
             is_root = False
             # ServiceX supports only root/parquet in transformed files
         else:
-            raise ValueError(
-                f"Unsupported file format: '{paths[0]}'. Files must be ROOT (.root) or Parquet (.parquet, .pq)"
+            raise RuntimeError(
+                f"Unsupported file format delivered by ServiceX: '{paths[0]}'. Files must be ROOT (.root) or Parquet (.parquet, .pq)"
             )
 
         try:
