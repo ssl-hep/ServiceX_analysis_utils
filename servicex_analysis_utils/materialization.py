@@ -48,7 +48,7 @@ def to_awk(deliver_dict, dask=False, iterator=False, **kwargs):
     """
 
     if not deliver_dict:
-        raise ValueError("Input dict from servicex.deliver cannot be empty.")
+        raise RuntimeError("Input dict from servicex.deliver cannot be empty.")
 
     awk_arrays = {}
 
@@ -66,7 +66,7 @@ def to_awk(deliver_dict, dask=False, iterator=False, **kwargs):
             # ServiceX supports only root/parquet in transformed files
         else:
             raise RuntimeError(
-                f"Unsupported delivered format: '{paths[0]}'. Must be R .root or Parquet (.parquet, .pq)"
+                f"Unsupported delivered format: '{paths[0]}'. Must be .root or Parquet (.parquet, .pq)"
             )
 
         try:
