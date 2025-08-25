@@ -9,13 +9,12 @@ import uproot
 @pytest.fixture
 def setup_form():
     # Create a simple awkward array with a RecordForm
-    arr = ak.Array([{"x": [1, 2, 3], "y": [4, 5]}])
-    form = arr.layout.form
+    simple_array = ak.Array([{"x": [1, 2, 3], "y": [4, 5]}])
 
     # Build a form from a .root file
     file = data_path("uproot-Zmumu.root") + ":events"
     uproot_array = uproot.open(file).arrays(library="ak")
-    return form, uproot_array.layout.form
+    return simple_array, uproot_array
 
 
 @pytest.fixture
@@ -28,18 +27,6 @@ def setup_type_tracer(setup_form, from_uproot):
     # Build a typetracer with the form
     tracer, report = read_buffers.build_typetracer_with_report(form)
     return tracer, report
-
-
-def test_instance_of_record_form(setup_form):
-    simple_form, root_form = setup_form
-    # Check instances of RecordForm
-    assert isinstance(
-        simple_form, ak.forms.RecordForm
-    ), f"Form is {type(simple_form)}, but should be RecordForm"
-
-    assert isinstance(
-        root_form, ak.forms.RecordForm
-    ), f"Form is {type(root_form)}, but should be RecordForm"
 
 
 @pytest.mark.parametrize("from_uproot", [True, False])

@@ -70,16 +70,18 @@ def is_branch_buffer(form_key, attribute, form):
     return f"{form_key}"
 
 
-def build_typetracer_with_report(form):
+def build_typetracer_with_report(array):
     """
     Build a typetracer from an awkward form, adding keys to the RecordForm and ListOffsetForm.
 
         Parameters:
-        form (ak.forms.Form): Form of the awkward array the typetracer will be built upon.
+        form (ak.HighLevel.Array): The awkward array the typetracer will be built upon.
 
     Returns:
-        tracer, report: ak.typetracer.TypeTracer: the typetracer built from the array form.
+        tracer, report: ak.typetracer.TypeTracer: the typetracer built from the array form and the report.
     """
+    # Get the form from the array
+    form = array.layout.form
     stamped_form = add_keys(form)
 
     tracer, report = ak.typetracer.typetracer_with_report(
