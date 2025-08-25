@@ -34,7 +34,8 @@ test = [
     "numpy>=1.21", 
     "pyarrow>=8.0.0",
     "pandas",
-    "miniopy-async==1.21.1"
+    "miniopy-async==1.21.1",
+    "scikit-hep-testdata",
 ]
 
 docs = [

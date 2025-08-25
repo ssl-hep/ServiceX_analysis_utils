@@ -14,8 +14,8 @@ def setup_form():
 
     # Build a form from a .root file
     file = data_path("uproot-Zmumu.root") + ":events"
-    array = uproot.open(file).arrays(library="ak")
-    return form, array.layout.form
+    uproot_array = uproot.open(file).arrays(library="ak")
+    return form, uproot_array.layout.form
 
 
 @pytest.fixture
