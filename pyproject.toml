@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "servicex_analysis_utils"
-version = "1.0.3"
+version = "1.1.0"
 description = "A package with analysis tools for ServiceX."
 authors = [{name = "Artur Cordeiro Oudot Choi", email = "acordeir@cern.ch"}]
 readme = "README.md"

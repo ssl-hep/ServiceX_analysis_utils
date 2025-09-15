@@ -28,5 +28,5 @@
 from .materialization import to_awk
 from .file_peeking import get_structure
 
-__version__ = "1.0.3"
+__version__ = "1.1.0"
 __all__ = ["to_awk", "get_structure"]
