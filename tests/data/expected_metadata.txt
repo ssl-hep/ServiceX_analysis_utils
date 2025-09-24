@@ -13,7 +13,7 @@ File Metadata ℹ️ :
 File structure with branch filter 🌿 '':
 
 
-🌳 Tree: Metadata
+🌳 Tree: MetaData
    ├── Branches:
    │   ├── FileMetaDataAuxDyn.test_100 ; dtype: AsDtype('>i8')
    │   ├── FileMetaDataAuxDyn.test_abc ; dtype: AsStrings()
