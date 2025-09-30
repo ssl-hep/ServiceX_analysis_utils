@@ -1,9 +1,16 @@
 
-File structure of all samples with branch filter '':
-
 ---------------------------
 📁 Sample: test_file
 ---------------------------
+
+File Metadata ℹ️ :
+
+No FileMetaData found in dataset.
+
+---------------------------
+
+File structure with branch filter 🌿 '':
+
 
 🌳 Tree: background
    ├── Branches:
