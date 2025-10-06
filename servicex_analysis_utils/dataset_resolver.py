@@ -32,7 +32,7 @@ from urllib.parse import urlparse
 from servicex import dataset
 
 def ds_type_resolver(
-    ds_name: str
+    ds_name: Union[str, list[str]]
 ) -> Union[dataset.FileList, dataset.Rucio, dataset.XRootD]:
     """Determine the type of dataset based on the input
     string and then return the ServiceX dataset object.
@@ -41,36 +41,38 @@ def ds_type_resolver(
         ds_name (str): Name of the dataset to fetch.
 
     Returns:
-        Tuple[dataset type]: The dataset object
+        dataset: The dataset object
     """
-    what_is_it = None
 
-    if re.match(r"^https?://", ds_name):
-        what_is_it = "url"
+    if isinstance(ds_name, list):
+        return dataset.FileList(ds_name)
+
+    elif re.match(r"^https?://", ds_name):
         url = ds_name
 
         parsed_url = urlparse(url)
         if "cernbox.cern.ch" in parsed_url.netloc and parsed_url.path.startswith(
             "/files/spaces"
         ):
-            remote_file = f"root://eospublic.cern.ch{parsed_url.path[13:]}"
-            what_is_it = "remote_file"
+            url = f"root://eospublic.cern.ch{parsed_url.path[13:]}"
+
+        return dataset.FileList([url])
 
     elif re.match(r"^rucio://", ds_name):
         what_is_it = "rucio"
         did = ds_name[8:]
-
-    else:
-        did = ds_name
-        what_is_it = "rucio"
-
-    if what_is_it == "url":
-        return dataset.FileList([url])
-
-    if what_is_it == "remote_file":
-        return dataset.FileList([remote_file])
-
-    if what_is_it == "rucio":
         return dataset.Rucio(did)
+    
+    elif ds_name.count(':') == 1 and '/' not in ds_name:
+        return dataset.Rucio(ds_name)
+    
+    elif ds_name.isdigit():
+        return dataset.CERNOpenData(int(ds_name))
+    
+    elif ds_name.startswith("root://") and ds_name.endswith("*"):
+        return dataset.XRootD(ds_name)
 
-    raise RuntimeError(f"Unknown input type: {what_is_it}")
+    elif re.match(r"^root://", ds_name):
+        return dataset.FileList(ds_name)
+
+    raise RuntimeError(f"Unable to find the type of input provided for dataset: {ds_name}")
