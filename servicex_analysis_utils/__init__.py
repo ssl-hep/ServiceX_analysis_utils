@@ -29,5 +29,5 @@ from .materialization import to_awk
 from .file_peeking import get_structure
 from .dataset_resolver import ds_type_resolver
 
-__version__ = "1.1.1"
+__version__ = "1.2.0a"
 __all__ = ["to_awk", "get_structure", "ds_type_resolver"]
