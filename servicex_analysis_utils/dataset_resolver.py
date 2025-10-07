@@ -33,7 +33,7 @@ from servicex import dataset
 
 def ds_type_resolver(
     ds_name: Union[str, list[str]]
-) -> Union[dataset.FileList, dataset.Rucio, dataset.XRootD]:
+) -> Union[dataset.FileList, dataset.Rucio, dataset.XRootD, dataset.CERNOpenData]:
     """Determine the type of dataset based on the input
     string and then return the ServiceX dataset object.
 
