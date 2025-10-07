@@ -31,8 +31,9 @@ from urllib.parse import urlparse
 
 from servicex import dataset
 
+
 def ds_type_resolver(
-    ds_name: Union[str, list[str]]
+    ds_name: Union[str, list[str]],
 ) -> Union[dataset.FileList, dataset.Rucio, dataset.XRootD, dataset.CERNOpenData]:
     """Determine the type of dataset based on the input
     string and then return the ServiceX dataset object.
@@ -62,17 +63,19 @@ def ds_type_resolver(
         what_is_it = "rucio"
         did = ds_name[8:]
         return dataset.Rucio(did)
-    
-    elif ds_name.count(':') == 1 and '/' not in ds_name:
+
+    elif ds_name.count(":") == 1 and "/" not in ds_name:
         return dataset.Rucio(ds_name)
-    
+
     elif ds_name.isdigit():
         return dataset.CERNOpenData(int(ds_name))
-    
+
     elif ds_name.startswith("root://") and ds_name.endswith("*"):
         return dataset.XRootD(ds_name)
 
     elif re.match(r"^root://", ds_name):
         return dataset.FileList(ds_name)
 
-    raise RuntimeError(f"Unable to find the type of input provided for dataset: {ds_name}")
+    raise RuntimeError(
+        f"Unable to find the type of input provided for dataset: {ds_name}"
+    )
