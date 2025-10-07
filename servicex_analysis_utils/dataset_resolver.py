@@ -25,9 +25,56 @@
 # CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-from .materialization import to_awk
-from .file_peeking import get_structure
-from .dataset_resolver import ds_type_resolver
+import re
+from typing import Union
+from urllib.parse import urlparse
 
-__version__ = "1.1.1"
-__all__ = ["to_awk", "get_structure", "ds_type_resolver"]
+from servicex import dataset
+
+
+def ds_type_resolver(
+    ds_name: Union[str, list[str]],
+) -> Union[dataset.FileList, dataset.Rucio, dataset.XRootD, dataset.CERNOpenData]:
+    """Determine the type of dataset based on the input
+    string and then return the ServiceX dataset object.
+
+    Args:
+        ds_name (str): Name of the dataset to fetch.
+
+    Returns:
+        dataset: The dataset object
+    """
+
+    if isinstance(ds_name, list):
+        return dataset.FileList(ds_name)
+
+    elif re.match(r"^https?://", ds_name):
+        url = ds_name
+
+        parsed_url = urlparse(url)
+        if "cernbox.cern.ch" in parsed_url.netloc and parsed_url.path.startswith(
+            "/files/spaces"
+        ):
+            url = f"root://eospublic.cern.ch{parsed_url.path[13:]}"
+
+        return dataset.FileList([url])
+
+    elif re.match(r"^rucio://", ds_name):
+        did = ds_name[8:]
+        return dataset.Rucio(did)
+
+    elif ds_name.count(":") == 1 and "/" not in ds_name:
+        return dataset.Rucio(ds_name)
+
+    elif ds_name.isdigit():
+        return dataset.CERNOpenData(int(ds_name))
+
+    elif ds_name.startswith("root://") and ds_name.endswith("*"):
+        return dataset.XRootD(ds_name)
+
+    elif re.match(r"^root://", ds_name):
+        return dataset.FileList(ds_name)
+
+    raise RuntimeError(
+        f"Unable to find the type of input provided for dataset: {ds_name}"
+    )

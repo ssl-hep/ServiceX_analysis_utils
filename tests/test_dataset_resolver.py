@@ -25,9 +25,23 @@
 # CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-from .materialization import to_awk
-from .file_peeking import get_structure
-from .dataset_resolver import ds_type_resolver
+import pytest
+from servicex_analysis_utils import ds_type_resolver
+from servicex import dataset
 
-__version__ = "1.1.1"
-__all__ = ["to_awk", "get_structure", "ds_type_resolver"]
+
+@pytest.mark.parametrize(
+    "input_ds, expected_type",
+    [
+        ("https://test.com", dataset.FileList),
+        ("test:data", dataset.Rucio),
+        ("rucio://test:test", dataset.Rucio),
+        ("123", dataset.CERNOpenData),
+        ("root://eosatlas.cern.ch//eos/", dataset.FileList),
+        ("root://eosatlas.cern.ch//eos/*", dataset.XRootD),
+        (["root://eosatlas.cern.ch//eos/", "https://test.com"], dataset.FileList),
+    ],
+)
+def test_find_dataset(input_ds, expected_type):
+    dataset = ds_type_resolver(input_ds)
+    assert isinstance(dataset, expected_type)
