@@ -60,7 +60,6 @@ def ds_type_resolver(
         return dataset.FileList([url])
 
     elif re.match(r"^rucio://", ds_name):
-        what_is_it = "rucio"
         did = ds_name[8:]
         return dataset.Rucio(did)
 
