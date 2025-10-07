@@ -29,6 +29,7 @@ import pytest
 from servicex_analysis_utils import ds_type_resolver
 from servicex import dataset
 
+
 @pytest.mark.parametrize(
     "input_ds, expected_type",
     [
@@ -38,7 +39,7 @@ from servicex import dataset
         ("123", dataset.CERNOpenData),
         ("root://eosatlas.cern.ch//eos/", dataset.FileList),
         ("root://eosatlas.cern.ch//eos/*", dataset.XRootD),
-        (["root://eosatlas.cern.ch//eos/","https://test.com"], dataset.FileList)
+        (["root://eosatlas.cern.ch//eos/", "https://test.com"], dataset.FileList),
     ],
 )
 def test_find_dataset(input_ds, expected_type):
