@@ -89,7 +89,7 @@ def to_awk(deliver_dict, dask=False, iterator=False, **kwargs):
                             awk_arrays[sample] = ak.concatenate(arrays)
                         else:
                             raise RuntimeError(
-                               f"No arrays yielded for sample {sample}. Check file content or TTree name."
+                                f"No arrays yielded for sample {sample}. Check file content or TTree name."
                             )
                 else:
                     # file is parquet
