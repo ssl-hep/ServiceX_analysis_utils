@@ -84,10 +84,12 @@ def to_awk(deliver_dict, dask=False, iterator=False, **kwargs):
                     if iterator == True:
                         awk_arrays[sample] = iterators  # return iterators
                     else:
-                        awk_arrays[sample] = ak.concatenate(
-                            list(iterators)
-                        )  # return array
-
+                        arrays = list(iterators)
+                        if arrays:
+                            awk_arrays[sample] = ak.concatenate(arrays)
+                        else:
+                            logging.warning(f"No arrays yielded for sample {sample}. Check file content or TTree name.")
+                            awk_arrays[sample] = None
                 else:
                     # file is parquet
                     awk_arrays[sample] = ak.from_parquet(paths, **kwargs)
