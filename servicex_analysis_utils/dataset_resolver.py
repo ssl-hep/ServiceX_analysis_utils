@@ -72,6 +72,19 @@ def ds_type_resolver(
     elif ds_name.startswith("root://") and ds_name.endswith("*"):
         return dataset.XRootD(ds_name)
 
+    elif ds_name.startswith("/eos/"):
+        if "opendata" in ds_name:
+            return dataset.FileList([f"root://eospublic.cern.ch/{ds_name}"])
+        elif "atlas" in ds_name:
+            return dataset.FileList([f"root://eosatlas.cern.ch/{ds_name}"])
+        elif "cms" in ds_name:
+            return dataset.FileList([f"root://eoscms.cern.ch/{ds_name}"])
+        else:
+            raise ValueError(
+                f"Unable to determine the correct EOS instance for the provided path: {ds_name}."
+                "Please provide the full root:// URL. Cannot be a user path."
+            )
+
     elif re.match(r"^root://", ds_name):
         return dataset.FileList(ds_name)
 
