@@ -73,11 +73,11 @@ def ds_type_resolver(
         return dataset.XRootD(ds_name)
 
     elif ds_name.startswith("/eos/"):
-        if "opendata" in ds_name:
+        if "/eos/opendata/" in ds_name:
             return dataset.FileList([f"root://eospublic.cern.ch/{ds_name}"])
-        elif "atlas" in ds_name:
+        elif "/eos/atlas/" in ds_name:
             return dataset.FileList([f"root://eosatlas.cern.ch/{ds_name}"])
-        elif "cms" in ds_name:
+        elif "/eos/cms/" in ds_name:
             return dataset.FileList([f"root://eoscms.cern.ch/{ds_name}"])
         else:
             raise ValueError(
