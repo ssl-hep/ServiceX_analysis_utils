@@ -45,3 +45,18 @@ from servicex import dataset
 def test_find_dataset(input_ds, expected_type):
     dataset = ds_type_resolver(input_ds)
     assert isinstance(dataset, expected_type)
+
+
+@pytest.mark.parametrize(
+    "eos_path, prefix",
+    [
+        ("/eos/opendata/atlas/rucio/somefile.root", "root://eospublic.cern.ch/"),
+        ("/eos/opendata/cms/rucio/somefile.root", "root://eospublic.cern.ch/"),
+        ("/eos/atlas/atlascerngroupdisk/somefile.root", "root://eosatlas.cern.ch/"),
+        ("/eos/cms/store/somefile.root", "root://eoscms.cern.ch/"),
+    ],
+)
+def test_eos_url_parsing(eos_path, prefix):
+    ds_out = ds_type_resolver(eos_path)
+    assert isinstance(ds_out, dataset.FileList)
+    assert ds_out.files[0] == prefix + eos_path
