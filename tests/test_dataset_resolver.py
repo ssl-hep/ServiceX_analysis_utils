@@ -40,6 +40,8 @@ from servicex import dataset
         ("root://eosatlas.cern.ch//eos/", dataset.FileList),
         ("root://eosatlas.cern.ch//eos/*", dataset.XRootD),
         (["root://eosatlas.cern.ch//eos/", "https://test.com"], dataset.FileList),
+        ("mc20_13TeV_valid_dataset_name", dataset.Rucio),
+        ("data22_13p6TeV_valid_dataset_name", dataset.Rucio),
     ],
 )
 def test_find_dataset(input_ds, expected_type):
