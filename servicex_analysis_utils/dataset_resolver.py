@@ -46,27 +46,28 @@ def ds_type_resolver(
     """
 
     def find_scope(name):
-        scopes =[
-        "mc23_13p6TeV",
-        "mc22_13p6TeV",
-        "mc21_13TeV",
-        "mc20_13TeV",
-        "mc16_13TeV",
-        "mc15_13TeV",
-        "data25_13p6TeV",
-        "data24_13p6TeV",
-        "data23_13p6TeV",
-        "data22_13p6TeV",
-        "data18_13TeV",
-        "data17_13TeV",
-        "data16_13TeV",
-        "data15_13TeV",
-    ]
+
+        scopes = [
+            "mc23_13p6TeV",
+            "mc22_13p6TeV",
+            "mc21_13TeV",
+            "mc20_13TeV",
+            "mc16_13TeV",
+            "mc15_13TeV",
+            "data25_13p6TeV",
+            "data24_13p6TeV",
+            "data23_13p6TeV",
+            "data22_13p6TeV",
+            "data18_13TeV",
+            "data17_13TeV",
+            "data16_13TeV",
+            "data15_13TeV",
+        ]
         for scope in scopes:
             if name.startswith(scope):
                 return scope
         return None
-    
+
     if isinstance(ds_name, list):
         return dataset.FileList(ds_name)
 
@@ -88,10 +89,9 @@ def ds_type_resolver(
     elif ds_name.count(":") == 1 and "/" not in ds_name:
         return dataset.Rucio(ds_name)
 
-    elif "/" not in ds_name:
-        scope = find_scope(ds_name)
-        if scope is not None:
-            return dataset.Rucio(scope + ":" + ds_name)
+    scope = find_scope(ds_name)
+    if scope is not None and "/" not in ds_name:
+        return dataset.Rucio(scope + ":" + ds_name)
 
     elif ds_name.isdigit():
         return dataset.CERNOpenData(int(ds_name))
