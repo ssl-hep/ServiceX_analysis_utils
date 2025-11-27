@@ -5,8 +5,15 @@ on:
     types: [released, prereleased]
 
 jobs:
-  build:
+  publish:
     runs-on: ubuntu-latest
+    
+    permissions:
+      id-token: write  # required to push with trusted-pypi-token
+      contents: wirte #required to push
+    
+    env:
+      BRANCH: ${{ github.event.release.target_commitish }}
     
     steps:
     - uses: actions/checkout@v4
@@ -47,69 +54,13 @@ jobs:
 
     - name: List contents of wheel
       run: python -m zipfile --list dist/servicex_analysis_utils-*.whl
-
-    - name: Upload an artifact of dist
-      uses: actions/upload-artifact@v4
-      with:
-        name: dist-gha-artifact
-        path: dist
-
-  publish:
-    needs: build
-    runs-on: ubuntu-latest  
-
-    permissions:
-      id-token: write  # required to push with trusted-pypi-token
-
-    env:
-      BRANCH: ${{ github.event.release.target_commitish }}
     
-    steps:
-    - name: Set up Python 3.12
-      uses: actions/setup-python@v5
-      with:
-        python-version: '3.12'
-
-    - name: Download artifact
-      uses: actions/download-artifact@v4
-      with:
-        name: dist-gha-artifact
-        path: dist
-
     - name: Publish distribution 
       uses: pypa/gh-action-pypi-publish@v1.12.3
       with:
         print-hash: true
-  
-  commit-version-bump:
-    needs: 
-      - build 
-      - publish
-    runs-on: ubuntu-latest
-    permissions:
-      contents: write  # required to push with GITHUB_TOKEN
 
-    steps:
-    - name: Checkout release target branch
-      uses: actions/checkout@v4
-      with:
-        ref: $BRANCH 
-
-    - name: Set up Python 3.12
-      uses: actions/setup-python@v5
-      with:
-        python-version: '3.12'
-
-    - name: Set env
-      run: echo "RELEASE_VERSION=${GITHUB_REF#refs/*/}" >> $GITHUB_ENV
-
-    - name: Update version to commit
-      run: |
-        sed -i 's/^version\s*=\s*".*"/version = "${{ env.RELEASE_VERSION }}"/' pyproject.toml
-        sed -i '/__version__/ s/__version__\s*=.*/__version__ = "${{ env.RELEASE_VERSION }}"/' servicex_analysis_utils/__init__.py
-
-
-    - name: Commit version change
+    - name: Commit version change to branch
       run: |
         git config --local user.name "github-actions[bot]"
         git config --local user.email "github-actions[bot]@users.noreply.github.com"
