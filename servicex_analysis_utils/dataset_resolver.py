@@ -33,13 +33,14 @@ from servicex import dataset
 
 
 def ds_type_resolver(
-    ds_name: Union[str, list[str]],
+    ds_name: Union[str, list[str], int],
 ) -> Union[dataset.FileList, dataset.Rucio, dataset.XRootD, dataset.CERNOpenData]:
     """Determine the type of dataset based on the input
     string and then return the ServiceX dataset object.
 
     Args:
-        ds_name (str): Name of the dataset to fetch.
+        ds_name (str, int, list): Name of the dataset to fetch. Can be a URL, Rucio DID,
+                                  CERN Open Data ID (as str or int), EOS path, or list of files.
 
     Returns:
         dataset: The dataset object
@@ -70,6 +71,9 @@ def ds_type_resolver(
 
     if isinstance(ds_name, list):
         return dataset.FileList(ds_name)
+
+    elif isinstance(ds_name, int):
+        return dataset.CERNOpenData(ds_name)
 
     elif re.match(r"^https?://", ds_name):
         url = ds_name
