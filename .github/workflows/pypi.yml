@@ -60,6 +60,9 @@ jobs:
 
     permissions:
       id-token: write  # required to push with trusted-pypi-token
+
+    env:
+      BRANCH: ${{ github.event.release.target_commitish }}
     
     steps:
     - name: Set up Python 3.12
@@ -87,10 +90,10 @@ jobs:
       contents: write  # required to push with GITHUB_TOKEN
 
     steps:
-    - name: Checkout main branch
+    - name: Checkout release target branch
       uses: actions/checkout@v4
       with:
-        ref: main 
+        ref: $BRANCH 
 
     - name: Set up Python 3.12
       uses: actions/setup-python@v5
@@ -120,8 +123,8 @@ jobs:
           echo "No changes to commit"
         fi
 
-    - name: Push commit to main
+    - name: Push commit to branch
       # GITHUB_TOKEN is automatically provided
       run: |
         git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}
-        git push origin main
+        git push origin HEAD:$BRANCH
