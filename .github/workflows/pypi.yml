@@ -74,8 +74,13 @@ jobs:
           echo "No changes to commit"
         fi
 
-    - name: Push commit to branch
+    - name: move tag
+      run: |
+        git tag -f ${{ env.RELEASE_VERSION }} -m "$(git tag -l --format='%(contents)' ${{ env.RELEASE_VERSION }})"
+
+    - name: Push commit to branch & new tag
       # GITHUB_TOKEN is automatically provided
       run: |
         git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}
         git push origin HEAD:$BRANCH
+        git push origin --force ${{ env.RELEASE_VERSION }}
