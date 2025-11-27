@@ -10,7 +10,7 @@ jobs:
     
     permissions:
       id-token: write  # required to push with trusted-pypi-token
-      contents: wirte #required to push
+      contents: write #required to push
     
     env:
       BRANCH: ${{ github.event.release.target_commitish }}
