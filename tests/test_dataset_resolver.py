@@ -37,6 +37,7 @@ from servicex import dataset
         ("test:data", dataset.Rucio),
         ("rucio://test:test", dataset.Rucio),
         ("123", dataset.CERNOpenData),
+        (123, dataset.CERNOpenData),
         ("root://eosatlas.cern.ch//eos/", dataset.FileList),
         ("root://eosatlas.cern.ch//eos/*", dataset.XRootD),
         (["root://eosatlas.cern.ch//eos/", "https://test.com"], dataset.FileList),
