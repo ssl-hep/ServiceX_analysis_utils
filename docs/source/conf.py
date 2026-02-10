@@ -8,7 +8,8 @@
 
 project = "ServiceX Analysis Utils"
 copyright = (
-    "2026 Institute for Research and " "Innovation in Software for High Energy Physics (IRIS-HEP)"
+    "2026 Institute for Research and "
+    "Innovation in Software for High Energy Physics (IRIS-HEP)"
 )
 author = "Institute for Research and Innovation in Software for High Energy Physics (IRIS-HEP)"
 html_title = "ServiceX Analysis Utilities"
@@ -22,18 +23,28 @@ extensions = [
     "sphinx_copybutton",
 ]
 
-templates_path = ['_templates']
+templates_path = ["_templates"]
 
 html_css_files = [
-    ('https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css', {'crossorigin': 'anonymous'}),
-    ('https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css', {'crossorigin': 'anonymous'}),
-    ('https://tryservicex.org/css/navbar.css', {'crossorigin': 'anonymous'}),
-    ('https://tryservicex.org/css/sphinx.css', {'crossorigin': 'anonymous'}),
+    (
+        "https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css",
+        {"crossorigin": "anonymous"},
+    ),
+    (
+        "https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css",
+        {"crossorigin": "anonymous"},
+    ),
+    ("https://tryservicex.org/css/navbar.css", {"crossorigin": "anonymous"}),
+    ("https://tryservicex.org/css/sphinx.css", {"crossorigin": "anonymous"}),
 ]
 
 html_js_files = [
-    ('https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js', 
-        {'integrity': 'sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI', 'crossorigin': 'anonymous'}
+    (
+        "https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js",
+        {
+            "integrity": "sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI",
+            "crossorigin": "anonymous",
+        },
     ),
 ]
 
