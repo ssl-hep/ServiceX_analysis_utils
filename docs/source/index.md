@@ -17,7 +17,6 @@ More information can be found in [Instalation and requirements](installation.md)
 
 ```{toctree}
 :maxdepth: 2
-:caption: Documentation Contents:
 
 installation
 materialization
