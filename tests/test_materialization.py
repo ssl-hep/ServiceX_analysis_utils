@@ -126,7 +126,7 @@ def test_to_awk_dask(build_test_samples):
 def test_to_awk_delayed_and_kwargs(build_test_samples):
     sx_dict = build_test_samples
     result_delay = to_awk(
-        sx_dict, iterator=True, expressions="branch1"
+        sx_dict, return_iterator=True, expressions="branch1"
     )  # return iterable + selection kwarg
 
     # Checking iterator return type
