@@ -30,8 +30,6 @@ import uproot
 import awkward as ak
 import dask_awkward as dak
 import logging
-import os
-import sys
 import numpy as np
 from servicex_analysis_utils import to_awk
 import types
@@ -176,3 +174,34 @@ def test_deliver_dict_empty_paths():
         match="Delivered result file path list for empty-Sample is empty.",
     ):
         to_awk(empty_dict)
+
+
+@pytest.fixture
+def build_test_samples_empty_file(tmp_path):
+    test_path1 = str(tmp_path / "test_file1.root")
+    # example data for two branches
+    tree_data1 = {"branch1": np.array([]), "branch2": np.array([])}
+
+    # Create tmp .root files
+    with uproot.create(test_path1) as file:
+        file["Tree"] = tree_data1
+
+    # Dict like servicex.deliver() output
+    sx_dict = {"Test-Sample1": [test_path1]}
+    return sx_dict
+
+
+def test_empty_file_warning(build_test_samples_empty_file, caplog):
+    sx_dict = build_test_samples_empty_file
+    # test logging warning
+    with caplog.at_level(logging.WARNING):
+        result = to_awk(sx_dict)
+
+    # assert warning message
+    assert (
+        "Sample Test-Sample1 has no data to load. Returning empty array." in caplog.text
+    )
+    # assert is array
+    assert isinstance(result["Test-Sample1"], ak.Array)
+    # assert array is empty
+    assert len(result["Test-Sample1"]) == 0
