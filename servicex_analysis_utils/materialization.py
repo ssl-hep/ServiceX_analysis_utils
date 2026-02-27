@@ -79,8 +79,21 @@ def to_awk(deliver_dict, dask=False, return_iterator=False, **kwargs):
                     awk_arrays[sample] = dak.from_parquet(paths, **kwargs)
             else:
                 if is_root == True:
+                    with uproot.open(paths[0]) as f:  # open a single file
+                        keys = f.keys()
+                        if len(keys) == 0:
+                            raise RuntimeError(
+                                f"No keys found in ROOT file for sample {sample}. Check the file content."
+                            )
+                        elif len(keys) > 1:
+                            logging.warning(
+                                f"Multiple keys found in ROOT file for sample {sample}. Using the first key: {keys[0]}"
+                            )
+                        object_name = keys[0].split(";")[0]
                     # Use uproot.iterate to handle URLs and local paths files in chunks
-                    iterators = uproot.iterate(paths, library="ak", **kwargs)
+                    # add :object name to each path - needed for RNTuples
+                    paths_iterate = [f"{path}:{object_name}" for path in paths]
+                    iterators = uproot.iterate(paths_iterate, library="ak", **kwargs)
                     if return_iterator == True:
                         awk_arrays[sample] = iterators  # return iterators
 
