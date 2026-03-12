@@ -1,8 +1,6 @@
 # Materialization of delivered data
 
-The `to_awk()` function provides a streamlined method to materialize the output of a ServiceX `deliver()` call into Awkward Arrays, Dask arrays, or iterators.
-
-This simplifies workflows by allowing easy manipulation of the retrieved data in various analysis pipelines like in the examples below.
+This page covers the usage of `to_awk()` for materializing the output of a ServiceX `deliver()` call into Awkward Arrays, Dask arrays, or iterators, and demonstrates integration with common analysis patterns.
 
 ---
 
@@ -64,7 +62,7 @@ arrays=to_awk(deliver(spec))
 
 ### Lazy Loading with Dask
 
-Load results lazily for large datasets using Dask task graphs. Enables parallel execution across multiple workers.
+Results are loaded lazily for large datasets using Dask task graphs, enabling parallel execution across multiple workers.
 
 ```python
 import dask_awkward as dak
@@ -76,13 +74,13 @@ mean_el_pt = dak.mean(el_pt_array).compute()
 
 ### Using Iterators
 
-Return iterators instead of materialized arrays to avoid loading too much data into memory. Requires `dask=False` (default). Example with loading 10,000 events per chunk:
+Iterators are returned instead of materialized arrays to avoid loading excessive data into memory. This option requires `dask=False` (the default). The following example loads 10,000 events per chunk:
 
 ```python
 iterables = to_awk(deliver(spec), iterator=True, step_size=10000)
 ```
 
-You can then manually loop over the data chunks:
+The data chunks can then be processed individually:
 
 ```python
 for chunk in iterables['simple_transform']:
@@ -90,7 +88,7 @@ for chunk in iterables['simple_transform']:
     analyse(chunk) #some function for el_pt
 ```
 
-All events can also be loaded by using: 
+All events can also be concatenated into a single array:
 
 ```python
 import awkward as ak
@@ -100,9 +98,9 @@ arrays= ak.concatenate(list[iterables['simple_transform']])
 ---
 
 
-## Multiple samples
+## Multiple Samples
 
-ServiceX queries allow multiple sample transformations. The `to_awk` allows a straightforward manipulation of such requests. This allows seamless integration with analysis frameworks with multiple samples being manipulated separately after being passing the same transformation using `deliver()`.
+ServiceX queries allow multiple sample transformations. The `to_awk()` function allows straightforward handling of such requests, enabling seamless integration with analysis frameworks where multiple samples are manipulated separately after being passed through the same transformation using `deliver()`.
 
 ```python
 from servicex_analysis_utils import to_awk
@@ -129,8 +127,8 @@ print(f"Mean electron pT (Background): {mean_background:.2f} GeV")
 
 ## Notes
 
-- **Multiple samples:** For transformations delivering multiple samples the dask and iterators are applied homegeneously to all.
-- **Error Handling:** In case of loading errors, the affected sample will have `None` as its value in the returned dictionary.
-- **Supported Formats:** A custom dict (non servicex) can be inputed but the paths must point be either ROOT or Parquet format.
+- **Multiple samples:** For transformations delivering multiple samples, `dask` and `iterator` options are applied homogeneously to all samples.
+- **Error Handling:** In case of loading errors, the affected sample has `None` as its value in the returned dictionary.
+- **Supported Formats:** A custom dictionary (non-ServiceX) can be provided, but the paths must be either ROOT or Parquet format.
 - **Branch Filtering, others:** Additional `**kwargs` allow specifying branch selections or other loading options supported by `uproot`, `awkward` and `dask_awkward`.
 
