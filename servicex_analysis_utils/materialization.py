@@ -31,7 +31,7 @@ import dask_awkward as dak
 import logging
 
 
-def to_awk(deliver_dict, dask=False, iterator=False, **kwargs):
+def to_awk(deliver_dict, dask=False, return_iterator=False, **kwargs):
     """
     Load an awkward array from the deliver() output with uproot or uproot.dask.
 
@@ -39,7 +39,7 @@ def to_awk(deliver_dict, dask=False, iterator=False, **kwargs):
         deliver_dict (dict): Returned dictionary from servicex.deliver()
                             (keys are sample names, values are file paths or URLs).
         dask (bool):        Optional. Flag to load as dask-awkward array. Default is False
-        iterator(bool):      Optional. Flag to materialize the data into arrays or to return iterables with uproot.iterate
+        return_iterator(bool):      Optional. Flag to materialize the data into arrays or to return iterables with uproot.iterate
         **kwargs :   Optional. Additional keyword arguments passed to uproot.dask, uproot.iterate and from_parquet
 
 
@@ -81,12 +81,21 @@ def to_awk(deliver_dict, dask=False, iterator=False, **kwargs):
                 if is_root == True:
                     # Use uproot.iterate to handle URLs and local paths files in chunks
                     iterators = uproot.iterate(paths, library="ak", **kwargs)
-                    if iterator == True:
+                    if return_iterator == True:
                         awk_arrays[sample] = iterators  # return iterators
+
                     else:
-                        awk_arrays[sample] = ak.concatenate(
-                            list(iterators)
-                        )  # return array
+                        it_arrays = list(iterators)
+                        if it_arrays == []:
+                            logging.warning(
+                                f"Sample {sample} has no data to load. Returning empty array."
+                            )
+                            awk_arrays[sample] = ak.Array([])  # return empty array
+
+                        else:
+                            awk_arrays[sample] = ak.concatenate(
+                                it_arrays
+                            )  # return array
 
                 else:
                     # file is parquet
