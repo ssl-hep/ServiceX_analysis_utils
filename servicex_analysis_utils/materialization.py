@@ -31,13 +31,15 @@ import awkward as ak
 import logging
 
 
-def to_awk(deliver_dict, return_iterator=False, **kwargs):
+def to_awk(deliver_dict, tree_name=None, return_iterator=False, **kwargs):
     """
     Load an awkward array from the deliver() output using uproot.
 
     Parameters:
         deliver_dict (dict): Returned dictionary from servicex.deliver()
                              (keys are sample names, values are file paths or URLs).
+        tree_name (str): Optional. Explicit ROOT key (TTree/RNTuple) to read.
+                         If provided, skips automatic key detection.
         return_iterator(bool): Optional. If True, return uproot.iterate generator.
                                Otherwise materialize the data into awkward arrays.
         **kwargs : Optional. Additional keyword arguments passed to uproot.iterate
@@ -75,41 +77,46 @@ def to_awk(deliver_dict, return_iterator=False, **kwargs):
 
             if is_root:
 
-                # Inspect ROOT file to find TTree or RNTuple
-                with uproot.open(paths[0]) as f:
+                # If user provided a tree_name, skip file inspection
+                if tree_name is not None:
+                    valid_object = tree_name
 
-                    keys = f.keys()
+                else:
+                    # Inspect ROOT file to find TTree or RNTuple
+                    with uproot.open(paths[0]) as f:
 
-                    if len(keys) == 0:
-                        raise RuntimeError(
-                            f"No keys found in ROOT file for sample {sample}. Check file content."
-                        )
+                        keys = f.keys()
 
-                    valid_object = None
-                    valid_keys = []
+                        if len(keys) == 0:
+                            raise RuntimeError(
+                                f"No keys found in ROOT file for sample {sample}. Check file content."
+                            )
 
-                    for key in keys:
+                        valid_object = None
+                        valid_keys = []
 
-                        obj = f[key]
-                        classname = obj.classname
+                        for key in keys:
 
-                        # Check if classname contains TTree or RNTuple
-                        if "TTree" in classname or "RNTuple" in classname:
-                            valid_keys.append(key)
+                            obj = f[key]
+                            classname = obj.classname
 
-                            if valid_object is None:
-                                valid_object = key.split(";")[0]
+                            # Check if classname contains TTree or RNTuple
+                            if "TTree" in classname or "RNTuple" in classname:
+                                valid_keys.append(key)
 
-                    if valid_object is None:
-                        raise RuntimeError(
-                            f"No TTree or RNTuple found in ROOT file for sample {sample}."
-                        )
+                                if valid_object is None:
+                                    valid_object = key.split(";")[0]
 
-                    if len(valid_keys) > 1:
-                        logging.warning(
-                            f"Multiple TTrees/RNTuples found in ROOT file for sample {sample}. "
-                            f"Using the first one: {valid_object} from keys: {valid_keys}"
-                        )
+                        if valid_object is None:
+                            raise RuntimeError(
+                                f"No TTree or RNTuple found in ROOT file for sample {sample}."
+                            )
+
+                        if len(valid_keys) > 1:
+                            logging.warning(
+                                f"Multiple TTrees/RNTuples found in ROOT file for sample {sample}. "
+                                f"Using the first one: {valid_object} from keys: {valid_keys}"
+                            )
 
                 # Prepare paths for iterate
                 paths_iterate = [f"{path}:{valid_object}" for path in paths]

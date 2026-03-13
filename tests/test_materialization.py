@@ -251,7 +251,7 @@ def build_multi_rntuple(tmp_path):
         )
         f.mkrntuple(
             "someotherobject",
-            {"branch1": branch1, "branch2": branch2},
+            {"branch2": branch2},
         )
 
     return str(file_path)
@@ -277,5 +277,18 @@ def test_multiple_keys_warning_and_content(build_multi_rntuple, caplog):
     # branch1 = np.arange(10) -> mean = 4.5
     assert float(ak.mean(arr["branch1"])) == 4.5
 
-    # branch2 = all 42 -> mean = 42
+    assert float(ak.mean(arr["branch2"])) == 42.0
+
+
+def test_open_specific_rntuple_key(build_multi_rntuple):
+    result = to_awk({"test": [build_multi_rntuple]}, tree_name="someotherobject")
+
+    arr = result["test"]
+
+    # ---- Check return type ----
+    assert isinstance(arr, ak.Array)
+
+    # ---- Only one branch should exist ----
+    assert ak.fields(arr) == ["branch2"]
+
     assert float(ak.mean(arr["branch2"])) == 42.0
