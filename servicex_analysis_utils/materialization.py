@@ -25,26 +25,28 @@
 # CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
 import uproot
 import awkward as ak
-import dask_awkward as dak
 import logging
 
 
-def to_awk(deliver_dict, dask=False, return_iterator=False, **kwargs):
+def to_awk(deliver_dict, tree_name=None, return_iterator=False, **kwargs):
     """
-    Load an awkward array from the deliver() output with uproot or uproot.dask.
+    Load an awkward array from the deliver() output using uproot.
 
     Parameters:
         deliver_dict (dict): Returned dictionary from servicex.deliver()
-                            (keys are sample names, values are file paths or URLs).
-        dask (bool):        Optional. Flag to load as dask-awkward array. Default is False
-        return_iterator(bool):      Optional. Flag to materialize the data into arrays or to return iterables with uproot.iterate
-        **kwargs :   Optional. Additional keyword arguments passed to uproot.dask, uproot.iterate and from_parquet
-
+                             (keys are sample names, values are file paths or URLs).
+        tree_name (str): Optional. Explicit ROOT key (TTree/RNTuple) to read.
+                         If provided, skips automatic key detection.
+        return_iterator(bool): Optional. If True, return uproot.iterate generator.
+                               Otherwise materialize the data into awkward arrays.
+        **kwargs : Optional. Additional keyword arguments passed to uproot.iterate
+                   and ak.from_parquet
 
     Returns:
-        dict: keys are sample names and values are awkward arrays, uproot generator objects or dask-awkward arrays.
+        dict: keys are sample names and values are awkward arrays or uproot iterators.
     """
 
     if not deliver_dict:
@@ -53,59 +55,108 @@ def to_awk(deliver_dict, dask=False, return_iterator=False, **kwargs):
     awk_arrays = {}
 
     for sample, paths in deliver_dict.items():
+
         if not paths:
             raise RuntimeError(
                 f"Delivered result file path list for {sample} is empty."
             )
-        # Check file type
+
+        # Determine file type
         f_type = str(paths[0])
+
         if ".root" in f_type:
             is_root = True
         elif ".parquet" in f_type or ".pq" in f_type:
             is_root = False
-            # ServiceX supports only root/parquet in transformed files
         else:
             raise RuntimeError(
                 f"Unsupported delivered format: '{paths[0]}'. Must be .root or Parquet (.parquet, .pq)"
             )
 
         try:
-            if dask:
-                if is_root == True:
-                    # Use uproot.dask to handle URLs and local paths lazily
-                    awk_arrays[sample] = uproot.dask(paths, library="ak", **kwargs)
+
+            if is_root:
+
+                # If user provided a tree_name, skip file inspection
+                if tree_name is not None:
+                    valid_object = tree_name
+
                 else:
-                    # file is parquet
-                    awk_arrays[sample] = dak.from_parquet(paths, **kwargs)
-            else:
-                if is_root == True:
-                    # Use uproot.iterate to handle URLs and local paths files in chunks
-                    iterators = uproot.iterate(paths, library="ak", **kwargs)
-                    if return_iterator == True:
-                        awk_arrays[sample] = iterators  # return iterators
+                    # Inspect ROOT file to find TTree or RNTuple
+                    with uproot.open(paths[0]) as f:
+
+                        keys = f.keys()
+
+                        if len(keys) == 0:
+                            raise RuntimeError(
+                                f"No keys found in ROOT file for sample {sample}. Check file content."
+                            )
+
+                        valid_object = None
+                        valid_keys = []
+
+                        for key in keys:
+
+                            obj = f[key]
+                            classname = obj.classname
+
+                            # Check if classname contains TTree or RNTuple
+                            if "TTree" in classname or "RNTuple" in classname:
+                                valid_keys.append(key)
+
+                                if valid_object is None:
+                                    valid_object = key.split(";")[0]
+
+                        if valid_object is None:
+                            raise RuntimeError(
+                                f"No TTree or RNTuple found in ROOT file for sample {sample}."
+                            )
+
+                        if len(valid_keys) > 1:
+                            logging.warning(
+                                f"Multiple TTrees/RNTuples found in ROOT file for sample {sample}. "
+                                f"Using the first one: {valid_object} from keys: {valid_keys}"
+                            )
+
+                # Prepare paths for iterate
+                paths_iterate = [f"{path}:{valid_object}" for path in paths]
+
+                iterators = uproot.iterate(
+                    paths_iterate,
+                    library="ak",
+                    **kwargs,
+                )
+
+                if return_iterator:
+
+                    awk_arrays[sample] = iterators
+
+                else:
+
+                    it_arrays = list(iterators)
+
+                    if it_arrays == []:
+
+                        logging.warning(
+                            f"Sample {sample} has no data to load. Returning empty array."
+                        )
+
+                        awk_arrays[sample] = ak.Array([])
 
                     else:
-                        it_arrays = list(iterators)
-                        if it_arrays == []:
-                            logging.warning(
-                                f"Sample {sample} has no data to load. Returning empty array."
-                            )
-                            awk_arrays[sample] = ak.Array([])  # return empty array
 
-                        else:
-                            awk_arrays[sample] = ak.concatenate(
-                                it_arrays
-                            )  # return array
+                        awk_arrays[sample] = ak.concatenate(it_arrays)
 
-                else:
-                    # file is parquet
-                    awk_arrays[sample] = ak.from_parquet(paths, **kwargs)
+            else:
 
-        except Exception as e:
-            # Log the exception pointing at the user's code
+                # Parquet loading
+                awk_arrays[sample] = ak.from_parquet(paths, **kwargs)
+
+        except Exception:
+
             msg = f"\nError loading sample: {sample}"
             logging.error(msg, exc_info=True, stacklevel=2)
-            # Mark the sample as failed
+
             awk_arrays[sample] = None
 
     return awk_arrays
