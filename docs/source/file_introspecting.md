@@ -1,14 +1,12 @@
 # Remote File Introspecting
 
-The `get_structure()` function allows users to query and inspect the internal structure of datasets available through ServiceX. This is useful for determining which branches exist in a given dataset before running a full transformation with the correct branch labelling and typing.
-
-It is useful for any lightweight exploration when only metadata or structure information is required without fetching event-level data.
+The `get_structure()` function allows inspection of the internal structure of datasets available through ServiceX. This is useful for determining which branches exist in a given dataset before running a full transformation, and for any lightweight exploration where only metadata or structure information is required without fetching event-level data.
 
 ---
 
-##  Overview
+## Overview
 
-The function internally issues a ServiceX request, using python function backend, for the specified dataset(s) and returns a simplified summary of the file structure, such as branches and types in a string formatted for readability.
+The function internally issues a ServiceX request, using the Python function backend, for the specified dataset(s) and returns a simplified summary of the file structure, such as branches and types, in a string formatted for readability.
 
 It accepts both programmatic and command-line usage with parametric return types.
 
@@ -22,13 +20,13 @@ get_structure(datasets, array_out=False, **kwargs)
 
 **Parameters:**
 
-- `datasets` (`dict`, `str`, or `list[str]`): One or more datasets to inspect. Made for Rucio DIDs. If a dictionary is used, keys will be used as labels for each dataset in the output string.
-- `array_out` (`bool`): If True, empty awkward arrays are reconstructed from the structure information. The function will return a dictionary of ak.Array.type objects. This allows for programmatic access to the dataset structure which can be further manipulated.
+- `datasets` (`dict`, `str`, or `list[str]`): One or more datasets to inspect. Designed for Rucio Dataset Identifiers (DIDs). If a dictionary is used, keys are used as labels for each dataset in the output string.
+- `array_out` (`bool`): If `True`, empty Awkward Arrays are reconstructed from the structure information. The function returns a dictionary of `ak.Array.type` objects, allowing programmatic access to the dataset structure.
 - `**kwargs`: Additional arguments forwarded to the helper function `print_structure_from_str`, such as `filter_branch` to apply a filter to displayed branches, `do_print` to print the output during the function call, or `save_to_txt` to save the output to `samples_structure.txt`.
 
 **Returns:**
 - `str`: The formatted file structure string.
-- `None`: If `do_print` or `save_to_txt` is `True`, the function will print or save the output to a file.
+- `None`: If `do_print` or `save_to_txt` is `True`, the function prints or saves the output to a file instead of returning it.
 - `dict`: keys are sample names and values are `ak.Array.type` objects with the same dataset structure.
 
 ---
@@ -47,11 +45,13 @@ This dumps to the shell a summary of the structure of the dataset, filtered to b
 $ servicex-get-structure "scope:dataset-rucio-id1" "scope:dataset-rucio-id2" --filter_branch "el_"
 ```
 
-This will output a combined summary of both datasets with the same filter.
+This outputs a combined summary of both datasets with the same filter applied.
 
 ---
 
-### Practical Output Example 
+### Practical Output Example
+
+The following command filters dataset branches by the pattern `el_pt`:
 
 Command:
 
@@ -87,17 +87,17 @@ The output lists all trees and branch names matching the specified filter patter
 It shows the branch data type information as interpreted by `uproot`. This includes the vector nesting level (jagged arrays) and the base type (e.g., f4 for 32-bit floats).
 
 
-#### JSON input 
+### JSON Input
 
-A json file can be used as input to simplify the command for multiple samples.
+A JSON file can be used as input to simplify the command for multiple samples. The file path is passed as the sole argument to `servicex-get-structure`.
 
 ```bash
-$ servicex-get-structure "path/to/datasets.jsosn" 
+$ servicex-get-structure "path/to/datasets.json"
 ```
 
-With `datasets.json` containing:
+The JSON file maps sample labels to Rucio Dataset Identifiers (DIDs). For example, `datasets.json` might contain:
 
-```
+```json
 {
   "Signal": "mc23_13TeV:signal-dataset-rucio-id",
   "Background W+jets": "mc23_13TeV:background-dataset-rucio-id1",
@@ -110,7 +110,7 @@ With `datasets.json` containing:
 
 ## Programmatic Example
 
-Similarly to the CLI functionality, the output string containing the dataset structure can be retrieved such as:
+Similar to the CLI, the output string containing the dataset structure can be retrieved programmatically:
 
 ```python
 from servicex_analysis_utils import get_structure
@@ -133,10 +133,9 @@ get_structure("mc23_13TeV:some-dataset-rucio-id", save_to_txt=True)
 ```
 
 
-#### Return awkward array type
+### Return Awkward Array Type
 
-
-If `array_out` is set to `True` the function reconstructs dummy arrays with the correct structre and return their `Awkward.Array.type` object. 
+If `array_out` is set to `True`, the function reconstructs dummy arrays with the correct structure and returns their `ak.Array.type` object.
 
 ```python
 from servicex_analysis_utils import get_structure
@@ -163,5 +162,5 @@ Type for branch 'runNumber': var * int64
 ## Notes
 
 - The function does not retrieve event data — only structure/metadata.
-- When using `json` input to the CLI, the same branch filtering will be applied to all samples.
-- Many types will show as None or unknown when they are not interpretable by the uproot or fail to be reconstructed to ak.arrays
+- When using `json` input to the CLI, the same branch filtering is applied to all samples.
+- Many types show as `None` or unknown when not interpretable by `uproot` or when reconstruction to `ak.Array` fails.

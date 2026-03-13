@@ -1,6 +1,6 @@
 # ServiceX Analysis Utilities
 
-This package provides tools interacting with [ServiceX](https://github.com/ssl-hep/ServiceX_frontend), a data extraction, transformation and delivery system built for ATLAS and CMS analyses on large datasets. The Analysis Utils package offers helper functions that streamline the usage of ServiceX and simplify its integration on workflows. But it also contains specific use case tools that benefit from the service. 
+This package provides tools for interacting with [ServiceX](https://github.com/ssl-hep/ServiceX_frontend), a data extraction, transformation, and delivery system built for ATLAS and CMS analyses on large datasets. The Analysis Utils package offers helper functions that streamline ServiceX usage and simplify its integration into analysis workflows. The package also contains specific use-case tools that leverage the service.
 
 ---
 
@@ -11,7 +11,7 @@ Install the package from PyPI:
 ```bash
 pip install servicex-analysis-utils
 ```
-More information can be found in [Instalation and requirements](installation.md)
+More information can be found in [Installation and requirements](installation.md)
 
 ## Documentation Contents
 
@@ -28,11 +28,11 @@ file_introspecting
 ## Utility Functions
 
 ### `to_awk()`
-Load an Awkward Array from ServiceX output easily.
+Loads Awkward Arrays from ServiceX `deliver()` output.
 
- See detailed usage here: [Materiazlization documentation](materialization.md)
+Detailed usage is available in [Materialization documentation](materialization.md).
 
 ### `get_structure()`
-Create and send ServiceX requests to retrieve file structures with a CLI implementation.
+Creates and sends ServiceX requests to retrieve file structures, with a CLI implementation.
 
- See detailed usage here: [File introspection documentation](file_introspecting.md)
+Detailed usage is available in [File introspection documentation](file_introspecting.md).
